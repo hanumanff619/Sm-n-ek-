@@ -32,8 +32,8 @@
     @media(min-width:1100px){.grid{grid-template-columns:1.5fr 1fr}}
     .card{background:var(--panel);border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.25);padding:1rem}
     hr{border:none;border-top:1px solid var(--line);margin:1rem 0}
-    input,select,textarea{width:100%;padding:.65rem .75rem;border-radius:12px;border:1px solid var(--line);background:#0c2240;color:var(--ink)}
-    input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-color:transparent}
+    input{width:100%;padding:.65rem .75rem;border-radius:12px;border:1px solid var(--line);background:#0c2240;color:var(--ink)}
+    input:focus{outline:2px solid var(--accent);border-color:transparent}
     label{display:block;font-size:.9rem;margin:.45rem 0 .25rem;color:var(--muted)}
     .row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
     .chip{padding:.3rem .7rem;border:1px solid var(--line);border-radius:99px}
@@ -86,37 +86,9 @@
   </section>
 
   <aside class="card">
-    <h3 style="margin-top:0">Rychlá akce</h3>
-    <div class="row">
-      <select id="batchType">
-        <option value="D">D</option>
-        <option value="N">N</option>
-        <option value="V">V</option>
-        <option value="">—</option>
-      </select>
-      <input id="batchFrom" type="date">
-      <input id="batchTo" type="date">
-      <button class="btn acc" id="applyBatch">Aplikovat</button>
-    </div>
-    <hr>
-    <h3>Generátor rozpisu</h3>
-    <div class="row">
-      <textarea id="pattern" rows="3"></textarea>
-      <input id="patternStart" type="date">
-      <button class="btn" id="applyPattern">Generovat</button>
-    </div>
-    <p class="note muted">Vzor: D/N/V/O (O=volno). Aplikuje se postupně od data.</p>
-    <hr>
-    <h3>Import textem</h3>
-    <div class="row">
-      <textarea id="raw" rows="3"></textarea>
-      <button class="btn" id="applyImport">Načíst</button>
-    </div>
-    <p class="note muted">Řádek: YYYY-MM-DD D|N|V|O</p>
-    <hr>
-    <h3>Statistiky měsíce</h3>
+    <h3 style="margin-top:0">Statistiky měsíce</h3>
     <div id="stats" class="note"></div>
-    <p class="note muted">D: 05:45–18:00, N: 17:45–06:00. Pauza 1h. Obědy jen denní. Dovolená = nastavené hodiny/den.</p>
+    <p class="note muted">D: 05:45–18:00, N: 17:45–06:00. Pauza 1h. Obědy jen denní všední dny. Dovolená = nastavené hodiny/den.</p>
     <hr>
     <h3>Mzda (vstupy)</h3>
     <label for="rate_base">Základní hodinovka</label><input id="rate_base" type="number">
@@ -148,6 +120,6 @@
   </aside>
 </div>
 
-<script src="app.js?v=13"></script>
+<script src="app.js?v=14"></script>
 </body>
 </html>

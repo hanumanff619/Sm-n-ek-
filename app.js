@@ -10,8 +10,13 @@ const $=id=>document.getElementById(id);
 function ymd(d){return d.toISOString().slice(0,10)} function ym(d){return d.toISOString().slice(0,7)}
 function daysInMonth(y,m){return new Date(y,m+1,0).getDate()} function firstDay(y,m){return new Date(y,m,1).getDay()||7}
 function isWeekend(d){const k=d.getDay(); return k===0||k===6;}
-function isHoliday(d){ return ["01-01","05-01","05-08","07-05","07-06","09-28","10-28","11-17","12-24","12-25","12-26"].includes(d.toISOString().slice(5,10)); }
-
+const HOLIDAYS = new Set(["01-01","05-01","05-08","07-05","07-06","09-28","10-28","11-17","12-24","12-25","12-26"]);
+function isHoliday(date){
+  const m = date.getMonth() + 1;
+  const d = date.getDate();
+  const md = (m < 10 ? "0" : "") + m + "-" + (d < 10 ? "0" : "") + d;
+  return HOLIDAYS.has(md);
+}
 function round2(x){return Math.round(x*100)/100}
 function parseNum(v){const n=parseFloat(v); return isNaN(n)?0:n;}
 

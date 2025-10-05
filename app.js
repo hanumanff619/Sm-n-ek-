@@ -222,15 +222,15 @@ function calcPay(){
   const net = gross - social - health - tax;
 
   const rows = [
-    ['Základ', money(basePay)],
-    ['Odpolední', money(odpoPay)],
-    ['Noční', money(nightPay)],
-    ['Víkend', money(weekendPay)],
-    ['Svátek', money(holidayPay)],
-    ['Nepřetržitý provoz', money(nepretPay)],
-    ['Prémie (přímé)', money(r.bonus)],
-    ['Stravenky', f'{money(mealTotal)}  ({mealCount} ks)'],
-  ];
+  ['Základ', money(basePay)],
+  ['Odpolední', money(odpoPay)],
+  ['Noční', money(nightPay)],
+  ['Víkend', money(weekendPay)],
+  ['Svátek', money(holidayPay)],
+  ['Nepřetržitý provoz', money(nepretPay)],
+  ['Prémie (přímé)', money(r.bonus)],
+  ['Stravenky', `${money(mealTotal)}  (${mealCount} ks)`],
+];
   $('pay').innerHTML = rows.map(([k,v])=>`<div class="tot"><span>${k}</span><span>${v}</span></div>`).join('');
   $('net').innerHTML = `<div class="bigline hruba"><span>💰 Hrubá mzda</span><span>${money(gross)}</span></div>
   <div class="bigline cista"><span>💵 Čistá mzda (odhad)</span><span>${money(net)}</span></div>`;

@@ -17,6 +17,7 @@
       --line:#2a4f7c;
       --sel:#1e78d799;
       --good:#5bd39a;
+      --goodtext:#79e0b7;
     }
     *{box-sizing:border-box}
     html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto}
@@ -45,12 +46,13 @@
     .badge{display:inline-block;margin-top:1.2rem;padding:.2rem .5rem;border-radius:8px;font-size:.85rem}
     .D{background:rgba(108,192,255,.17)}
     .N{background:rgba(255,188,104,.14)}
+    .V{background:rgba(119,214,139,.18)}
     .tot{display:flex;justify-content:space-between;padding:.4rem .6rem;border:1px solid var(--line);border-radius:10px;margin:.3rem 0}
-    .tot b{color:var(--good)}
-    .bigline{margin-top:.6rem;padding:.6rem .8rem;border-radius:12px;border:1px solid var(--line);display:flex;justify-content:space-between;font-weight:600}
+    .bigline{margin-top:.6rem;padding:.6rem .8rem;border-radius:12px;border:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;font-weight:600}
     .hruba{background:rgba(108,192,255,.12)}
     .cista{background:rgba(91,211,154,.12)}
     .note{font-size:.86rem}
+    .inline-bonus{margin-left:1rem;font-weight:600;color:var(--goodtext);white-space:nowrap}
   </style>
 </head>
 <body>
@@ -76,7 +78,7 @@
         <button class="btn" id="next">&rarr;</button>
       </div>
       <div class="row">
-        <button class="btn acc" id="setToday">Dnes D/N</button>
+        <button class="btn acc" id="setToday">Dnes D/N/V</button>
         <button class="btn" id="clearDay">Vymazat den</button>
       </div>
     </div>
@@ -89,6 +91,7 @@
       <select id="batchType">
         <option value="D">D</option>
         <option value="N">N</option>
+        <option value="V">V</option>
         <option value="">—</option>
       </select>
       <input id="batchFrom" type="date">
@@ -102,34 +105,49 @@
       <input id="patternStart" type="date">
       <button class="btn" id="applyPattern">Generovat</button>
     </div>
-    <p class="note muted">Vzor: DNNOO (D=den, N=noc, O=volno). Aplikuje se postupně od data.</p>
+    <p class="note muted">Vzor: D/N/V/O (O=volno). Aplikuje se postupně od data.</p>
     <hr>
     <h3>Import textem</h3>
     <div class="row">
       <textarea id="raw" rows="3"></textarea>
       <button class="btn" id="applyImport">Načíst</button>
     </div>
-    <p class="note muted">Řádek: YYYY-MM-DD D|N|O</p>
+    <p class="note muted">Řádek: YYYY-MM-DD D|N|V|O</p>
     <hr>
     <h3>Statistiky měsíce</h3>
     <div id="stats" class="note"></div>
-    <p class="note muted">D: 05:45–18:00, N: 17:45–06:00. Pauza 1h. Obědy jen denní.</p>
+    <p class="note muted">D: 05:45–18:00, N: 17:45–06:00. Pauza 1h. Obědy jen denní. Dovolená = nastavené hodiny/den.</p>
     <hr>
     <h3>Mzda (vstupy)</h3>
     <label for="rate_base">Základní hodinovka</label><input id="rate_base" type="number">
     <label for="rate_odpo">Odpolední příplatek</label><input id="rate_odpo" type="number">
     <label for="rate_noc">Noční příplatek</label><input id="rate_noc" type="number">
     <label for="rate_vikend">Víkendový příplatek</label><input id="rate_vikend" type="number">
-    <label for="rate_svatek">Svátek</label><input id="rate_svatek" type="number">
+    <label for="rate_svatek">Příplatek za svátek (odpracovaný)</label><input id="rate_svatek" type="number">
     <label for="rate_nepretrzity">Nepřetržitý provoz</label><input id="rate_nepretrzity" type="number">
-    <label for="vac_hours">Dovolená (v hodinách)</label><input id="vac_hours" type="number">
-    <label for="bonus_prime">Přímé prémie</label><input id="bonus_prime" type="number">
-    <label for="meal_value">Hodnota stravenky (Kč/ks)</label><input id="meal_value" type="number">
+    <label for="vac_hours_day">Dovolená (hod/den)</label><input id="vac_hours_day" type="number">
+    <hr>
+    <h3>Průměrná náhrada (poslední 3 měsíce)</h3>
+    <div class="row">
+      <div style="flex:1;min-width:120px">
+        <label>Čistá mzda M-1</label><input id="avg_net1" type="number">
+        <label>Hodiny M-1</label><input id="avg_h1" type="number">
+      </div>
+      <div style="flex:1;min-width:120px">
+        <label>Čistá mzda M-2</label><input id="avg_net2" type="number">
+        <label>Hodiny M-2</label><input id="avg_h2" type="number">
+      </div>
+      <div style="flex:1;min-width:120px">
+        <label>Čistá mzda M-3</label><input id="avg_net3" type="number">
+        <label>Hodiny M-3</label><input id="avg_h3" type="number">
+      </div>
+    </div>
+    <div class="note muted" id="avg_info">Průměrná náhrada: 0 Kč/h</div>
     <div id="pay" style="margin-top:.6rem"></div>
     <div id="net" class="note"></div>
   </aside>
 </div>
 
-<script src="app.js?v=6"></script>
+<script src="app.js?v=13"></script>
 </body>
 </html>

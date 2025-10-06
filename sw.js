@@ -1,5 +1,5 @@
-// Směnářek SW v14 – network-first pro app a HTML
-const CACHE = 'smenarek-cache-v14';
+// Směnářek SW v15 – network-first pro app a HTML
+const CACHE = 'smenarek-cache-v15';
 const ASSETS = ['./','./index.html','./manifest.json','./icons/icon-192.png','./icons/icon-512.png'];
 self.addEventListener('install', (e) => { self.skipWaiting(); e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS))); });
 self.addEventListener('activate', (e) => {

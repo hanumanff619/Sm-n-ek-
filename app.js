@@ -1,4 +1,4 @@
-// Směnářek 1.5 — 12h/8h režim, barva kalendáře, info modaly, prémie %, ruční průměr, svátek auto + průměr, fix lokálního dne
+// Směnářek 1.5.1 — hotfix: oprava JS (bonus_pct), jinak stejné jako 1.5
 const HOLIDAYS = new Set(["01-01","05-01","05-08","07-05","07-06","09-28","10-28","11-17","12-24","12-25","12-26"]);
 const MEAL_DEDUCT = 40, LUNCH_DEDUCT = 40, MEAL_INFO_VALUE = 110;
 
@@ -11,7 +11,7 @@ if(!state.lockedMonths) state.lockedMonths={};
 if(!state.rates) state.rates={};
 if(state.bonus_pct==null) state.bonus_pct = 10;
 if(!state.avg) state.avg={net1:null,h1:null,net2:null,h2:null,net3:null,h3:null, manual:null};
-if(!state.mode) state.mode='12'; // '12' or '8'
+if(!state.mode) state.mode='12';
 let current = new Date(); let selectedDate=null; let deferredPrompt=null;
 
 const $=id=>document.getElementById(id);
@@ -153,13 +153,13 @@ $('clearDay').onclick=()=>{ if(!selectedDate) return alert('Klepni nejdřív na 
 $('mode12').onclick=()=>{ state.mode='12'; save(); renderCalendar(); };
 $('mode8').onclick=()=>{ state.mode='8'; save(); renderCalendar(); };
 
-// Inputs bind
+// Inputs bind (hotfix line ↓)
 ['rate_base','rate_odpo','rate_noc','rate_vikend','rate_svatek','rate_nepretrzity','vac_hours_day'].forEach(id=>{
   const el=$(id); el.value = (state.rates[id]!==undefined && state.rates[id]!==null) ? state.rates[id] : '';
   el.addEventListener('input', ()=>{ state.rates[id]=el.value===''?null:parseNum(el.value); save(); calcPay(); });
 });
-$('bonus_pct').value = state.bonus_pct if state.bonus_pct is not None else 10;
-$('bonus_pct').addEventListener('input', ()=>{ state.bonus_pct = parseNum($('bonus_pct').value||'0'); save(); calcPay(); });
+document.getElementById('bonus_pct').value = (state.bonus_pct ?? 10);
+document.getElementById('bonus_pct').addEventListener('input', ()=>{ state.bonus_pct = parseNum(document.getElementById('bonus_pct').value||'0'); save(); calcPay(); });
 
 ['avg_net1','avg_h1','avg_net2','avg_h2','avg_net3','avg_h3','avg_manual'].forEach(id=>{
   const el=$(id); el.value = (state.avg[id]!==undefined && state.avg[id]!==null) ? state.avg[id] : '';
@@ -230,7 +230,7 @@ function calcPay(){
   const odpoPay = r.odpo * afterH;
   const nightPay = r.noc * nightH;
   const weekendPay = r.vikend * weekendH;
-  const holWorkedPay = avg * holWorkedH; // svátek = příplatek navíc z průměru
+  const holWorkedPay = avg * holWorkedH;
   const nepretPay = r.nepretrzity * totalH;
   const prime = basePay * (parseNum(state.bonus_pct||10)/100);
   const vacAllowance = vDays * vacPerDay * avg;
@@ -291,7 +291,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
 });
 
 // PWA install & SW
-let deferredPrompt=null;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault(); deferredPrompt=e;});
 document.getElementById('install').onclick=async()=>{ if(deferredPrompt){ deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; } else alert('V menu prohlížeče zvol "Přidat na plochu".'); };
 if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js')); }

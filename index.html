@@ -26,33 +26,29 @@
     .grid{display:grid;grid-template-columns:1fr;gap:.9rem}
     @media(min-width:1100px){.grid{grid-template-columns:1.5fr 1fr}}
     .card{background:var(--panel);border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.25);padding:1rem;position:relative}
-
-    /* Kalendář – průsvitný, aby byl vidět background */
+    /* Kalendář – průsvitný */
     #card-calendar{position:relative;overflow:hidden}
     #bg-layer{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.24;filter:brightness(.92);pointer-events:none}
     #card-calendar > *:not(#bg-layer){position:relative}
     .calendar{width:100%;border-collapse:collapse}
     .calendar th,.calendar td{border:1px solid rgba(255,255,255,.08);padding:.35rem;vertical-align:top}
     .calendar th{color:var(--muted);font-weight:600;text-align:center;background:rgba(14,38,70,.55)}
-    .calendar td{
-      height:92px;position:relative;
-      background:rgba(15,39,72,.38); /* průsvitné buňky */
-      transition:background .15s ease
-    }
+    .calendar td{height:92px;position:relative;background:rgba(15,39,72,.38);transition:background .15s ease}
     .calendar td.selected{background:var(--sel)!important;box-shadow:inset 0 0 0 2px #75c7ff99}
     .daynum{position:absolute;top:.35rem;right:.35rem;color:var(--muted);font-size:.85rem;text-shadow:0 1px 1px rgba(0,0,0,.35)}
     .badge{display:inline-block;margin-top:1.2rem;padding:.2rem .5rem;border-radius:8px;font-size:.85rem;background:rgba(0,0,0,.18)}
-    .D{background:linear-gradient(180deg,rgba(108,192,255,.10),rgba(108,192,255,.08))} 
+    .D{background:linear-gradient(180deg,rgba(108,192,255,.10),rgba(108,192,255,.08))}
     .N{background:linear-gradient(180deg,rgba(255,188,104,.10),rgba(255,188,104,.08))}
     .V{background:linear-gradient(180deg,rgba(119,214,139,.12),rgba(119,214,139,.08))}
     .R{background:linear-gradient(180deg,rgba(108,192,255,.10),rgba(108,192,255,.08))}
     .O{background:linear-gradient(180deg,rgba(255,188,104,.10),rgba(255,188,104,.08))}
     .row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
     .chip{padding:.3rem .7rem;border:1px solid rgba(255,255,255,.12);border-radius:99px;background:transparent;color:var(--ink);cursor:pointer}
-
-    .note{font-size:.86rem;color:var(--muted)}
-    .substats{margin-top:.5rem;border:1px dashed rgba(255,255,255,.12);border-radius:10px;padding:.55rem .65rem;background:rgba(0,0,0,.08)}
-    .substats div{display:flex;justify-content:space-between;margin:.15rem 0}
+    label{display:block;margin:.45rem 0 .2rem}
+    input{width:100%;padding:.45rem .6rem;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.12);color:var(--ink)}
+    .paylist{margin-top:.5rem}
+    .payline{display:flex;justify-content:space-between;padding:.35rem 0;border-bottom:1px solid rgba(255,255,255,.08)}
+    .payline:last-child{border-bottom:none}
     .result{margin-top:.6rem;padding:.7rem .9rem;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(91,211,154,.12);color:#9ff3cd;font-weight:700}
   </style>
 </head>
@@ -99,10 +95,15 @@
   <aside class="card" id="card-stats">
     <h3 style="margin-top:0">Statistiky měsíce</h3>
     <div id="stats" class="note"></div>
-    <div id="substats" class="substats" style="display:none"></div>
-    <p class="note">Obědy jen všední den při denní (12h: D; 8h: R). Dovolená = nastavené hodiny/den. Svátek: směna + příplatek z průměru.</p>
+    <div id="substats" class="note" style="display:none"></div>
+    <p class="note">Obědy jen všední den při denní (12h: D; 8h: R). Dovolená = nastavené hodiny/den. Svátek: směna + průměr.</p>
     <hr>
     <h3>Mzda (vstupy)</h3>
+
+    <!-- Zelené výsledky NAHOŘE -->
+    <div id="net" class="note"></div>
+
+    <!-- Vstupy -->
     <label>Základní hodinovka</label><input id="rate_base" type="number">
     <div class="row" style="width:100%">
       <div style="flex:1;min-width:140px"><label>Odpolední příplatek</label><input id="rate_odpo" type="number"></div>
@@ -122,50 +123,11 @@
     </div>
     <label>Dovolená (hod/den)</label><input id="vac_hours_day" type="number" value="8">
 
-    <hr>
-    <h3>Jmeniny (CZ) – automaticky</h3>
-    <div class="note">Jmeniny jsou zabudované pro aktuální měsíc + další. Volitelně můžeš nahrát <code>namedays_cz.json</code> pro celý rok.</div>
-
-    <div id="pay" style="margin-top:1rem"></div>
-    <div id="net" class="note"></div>
+    <!-- Výplatní položky -->
+    <div id="pay" class="paylist"></div>
   </aside>
 </div>
 
-<script src="app.js?v=155"></script>
-</body>
-</html>    <div class="row" style="width:100%">
-      <div style="flex:1;min-width:140px"><label>Nepřetržitý provoz</label><input id="rate_nepretrzity" type="number"></div>
-      <div style="flex:1;min-width:140px"><label>Přímé prémie (%)</label><input id="bonus_pct" type="number" value="10"></div>
-    </div>
-    <div class="row" style="width:100%">
-      <div style="flex:1;min-width:140px"><label>Cafeterie (Kč)</label><input id="cafeteria" type="number" value="0"></div>
-      <div style="flex:1;min-width:140px"><label>Roční motivační (Kč)</label><input id="annual_bonus" type="number" value="0"></div>
-    </div>
-    <label>Dovolená (hod/den)</label><input id="vac_hours_day" type="number" value="8">
-    <hr>
-    <h3>Průměrná náhrada (poslední 3 měsíce)</h3>
-    <div class="row">
-      <div style="flex:1;min-width:120px"><label>Čistá mzda M-1</label><input id="avg_net1" type="number"><label>Hodiny M-1</label><input id="avg_h1" type="number"></div>
-      <div style="flex:1;min-width:120px"><label>Čistá mzda M-2</label><input id="avg_net2" type="number"><label>Hodiny M-2</label><input id="avg_h2" type="number"></div>
-      <div style="flex:1;min-width:120px"><label>Čistá mzda M-3</label><input id="avg_net3" type="number"><label>Hodiny M-3</label><input id="avg_h3" type="number"></div>
-    </div>
-    <label>Ručně zadaná průměrná náhrada (Kč/h)</label><input id="avg_manual" type="number">
-    <div class="note" id="avg_info">Průměrná náhrada: 0 Kč/h</div>
-
-    <hr>
-    <h3>Jmeniny (volitelné)</h3>
-    <div class="note">Vlož JSON mapu {"MM-DD":"Jméno"}; zobrazí se vedle „Svátek:“ v hlavičce.</div>
-    <textarea id="namedays_json" rows="3" placeholder=""></textarea>
-    <div class="row" style="margin-top:.5rem">
-      <button class="chip" id="btnLoadNames">Načíst jmeniny</button>
-      <button class="chip" id="btnClearNames">Vymazat jmeniny</button>
-    </div>
-
-    <div id="pay" style="margin-top:1rem"></div>
-    <div id="net" class="note"></div>
-  </aside>
-</div>
-
-<script src="app.js?v=154"></script>
+<script src="app.js?v=170"></script>
 </body>
 </html>

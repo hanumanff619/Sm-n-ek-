@@ -47,14 +47,12 @@
     .O{background:linear-gradient(180deg,rgba(255,188,104,.10),rgba(255,188,104,.08))}
     .row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
     .chip{padding:.3rem .7rem;border:1px solid rgba(255,255,255,.12);border-radius:99px;background:transparent;color:var(--ink);cursor:pointer}
-
     label{display:block;margin:.45rem 0 .2rem}
-    input{width:100%;padding:.45rem .6rem;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.12);color:var(--ink)}
+    input[type="number"]{width:100%;padding:.45rem .6rem;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.12);color:var(--ink)}
     .paylist{margin-top:.5rem}
     .payline{display:flex;justify-content:space-between;padding:.35rem 0;border-bottom:1px solid rgba(255,255,255,.08)}
     .payline:last-child{border-bottom:none}
     .result{margin-top:.6rem;padding:.7rem .9rem;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(91,211,154,.12);color:#9ff3cd;font-weight:700}
-    .result.info{background:rgba(108,192,255,.12);color:#d9efff}
   </style>
 </head>
 <body>
@@ -113,7 +111,6 @@
     <hr>
 
     <h3>Mzda (vstupy)</h3>
-    <!-- Vstupy -->
     <label>Základní hodinovka</label><input id="rate_base" type="number">
     <div class="row" style="width:100%">
       <div style="flex:1;min-width:140px"><label>Odpolední příplatek</label><input id="rate_odpo" type="number"></div>
@@ -124,10 +121,15 @@
       <div style="flex:1;min-width:140px"><label>Nepřetržitý provoz</label><input id="rate_nepretrzity" type="number"></div>
     </div>
     <div class="row" style="width:100%">
+      <div style="flex:1;min-width:220px;display:flex;align-items:center;gap:.5rem">
+        <input id="caf_check" type="checkbox">
+        <label for="caf_check" style="margin:0">Docházkový bonus (Cafeterie 1000 Kč – mimo čistou)</label>
+      </div>
+    </div>
+    <div class="row" style="width:100%">
       <div style="flex:1;min-width:140px"><label>Přímé prémie (%)</label><input id="bonus_pct" type="number" value="10"></div>
       <div style="flex:1;min-width:140px"><label>Roční motivační (Kč)</label><input id="annual_bonus" type="number" value="0"></div>
     </div>
-    <label>Cafeterie (Kč) – mimo čistou mzdu</label><input id="cafeteria" type="number" value="0">
 
     <div id="pay" class="paylist"></div>
 
@@ -138,6 +140,6 @@
   </aside>
 </div>
 
-<script src="app_v172.js?v=172"></script>
+<script src="app_v174.js?v=174"></script>
 </body>
 </html>

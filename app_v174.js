@@ -154,7 +154,7 @@ function applyBackground(){
 /* ====== Výpočty ====== */
 function updateStats(){
   const y=current.getFullYear(), m=current.getMonth(), last=new Date(y,m+1,0);
-  const DAILY=12.25;   // 12h směna celkem
+  const DAILY=11.25;   // 12h směna (reálně uznaná)
   const H8=8.0;        // 8h směna celkem
 
   let dDay=0,nDay=0,vac=0,hours=0,nightH=0,afterH=0,weekendH=0,holWorkedH=0;

@@ -136,7 +136,8 @@ function applyBackground(){
 function updateStats(){
   const y=current.getFullYear(), m=current.getMonth(), last=new Date(y,m+1,0);
   const DAILY=12.25; // 12h režim
-  const H8=7.5;
+- const H8=7.5;
++ const H8=8.0;
 
   let dDay=0,nDay=0,vac=0,hours=0,nightH=0,afterH=0,weekendH=0,holWorkedH=0;
 
@@ -189,7 +190,8 @@ function updateStats(){
     ].join('');
   } else $('substats').style.display='none';
 
-  state._calc={hours,afterH,nightH,weekendH,vac,holWorkedH,DAILY,H8}; save();
+  state._calc = { hours, afterH, nightH, weekendH, vac, holWorkedH, DAILY, H8, VAC12: 11.25, VAC8: 8.0 };
+save();
 }
 
 function avgRate(){
@@ -323,7 +325,7 @@ function updateStats(){
   }
 
   const head = state.mode==='8'
-    ? `Ranní+Odpolední: <b>${r2(afterH/7.5)}</b> • Noční: <b>${r2(nightH/7.5)}</b> • Dovolené: <b>${vac}</b>`
+    ? `Ranní+Odpolední: <b>${r2(afterH/8)}</b> • Noční: <b>${r2(nightH/8)}</b> • Dovolené: <b>${vac}</b>`
     : `Denní: <b>${dDay}</b> • Noční: <b>${nDay}</b> • Dovolené: <b>${vac}</b>`;
   $('stats').innerHTML = [head, `Hodiny: <b>${r2(hours)}</b>`, `Svátek odpracovaný: <b>${r2(holWorkedH)} h</b>`].join('<br>');
 
@@ -363,7 +365,8 @@ function calcPay(){
   const holPay  = avg * C.holWorkedH;
   const nepret  = r.nepretrzity * C.hours;
   const prime   = basePay * ((state.bonus_pct||0)/100);
-  const vacHours = (state.rates['vac_hours_day']??8);
+  - const vacHours = (state.mode==='8'? C.H8 : C.DAILY);
++ const vacHours = (state.mode==='8' ? C.VAC8 : C.VAC12);
   const vacPay  = vacHours * avg * C.vac;
 
   function mealsCalc(){

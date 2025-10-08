@@ -9,8 +9,8 @@
   <link rel="icon" href="icons/icon-192.png">
   <style>
     :root{
-      --bg:#0c1d33; --panel:#123055; --ink:#eaf2ff; --muted:#a9c3e6; --accent:#6cc0ff;
-      --line:#2a4f7c; --sel:#1e78d799; --good:#5bd39a; --goodtext:#9ff3cd;
+      --bg:#0c1d33; --panel:#122e52; --ink:#eaf2ff; --muted:#a9c3e6; --accent:#6cc0ff;
+      --sel:#1e78d799; --good:#5bd39a; --goodtext:#9ff3cd; --field:#0b213d; --border:#1f3f66;
     }
     body.mode8{ --accent:#b38cff; --sel:#7b3ff299; }
     html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto}
@@ -26,8 +26,8 @@
     .grid{display:grid;grid-template-columns:1fr;gap:.9rem}
     @media(min-width:1100px){.grid{grid-template-columns:1.5fr 1fr}}
     .card{background:var(--panel);border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.25);padding:1rem;position:relative}
-    .info{position:absolute;top:10px;right:12px;font-size:.9rem;opacity:.8;cursor:pointer}
-    .tooltip{position:absolute;right:10px;top:36px;max-width:320px;background:rgba(0,0,0,.8);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:.6rem .7rem;font-size:.9rem;display:none}
+    .info{position:absolute;top:10px;right:12px;font-size:.9rem;opacity:.85;cursor:pointer}
+    .tooltip{position:absolute;right:12px;left:auto;top:36px;max-width:360px;background:rgba(0,0,0,.85);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:.6rem .7rem;font-size:.9rem;display:none}
     .info:hover + .tooltip{display:block}
 
     #card-calendar{position:relative;overflow:hidden}
@@ -45,14 +45,20 @@
     .V{background:linear-gradient(180deg,rgba(119,214,139,.12),rgba(119,214,139,.08))}
     .R{background:linear-gradient(180deg,rgba(108,192,255,.10),rgba(108,192,255,.08))}
     .O{background:linear-gradient(180deg,rgba(255,188,104,.10),rgba(255,188,104,.08))}
+
     .row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
     .chip{padding:.3rem .7rem;border:1px solid rgba(255,255,255,.12);border-radius:99px;background:transparent;color:var(--ink);cursor:pointer}
-    label{display:block;margin:.45rem 0 .2rem}
-    input[type="number"]{width:100%;padding:.45rem .6rem;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.12);color:var(--ink)}
+
+    label{display:block;margin:.45rem 0 .25rem}
+    input[type="number"]{width:100%;padding:.6rem .7rem;border-radius:12px;border:1px solid var(--border);background:var(--field);color:var(--ink)}
+    input[type="number"]:focus{outline:none;border-color:#3e78b9;box-shadow:0 0 0 2px rgba(110,192,255,.25)}
+
     .paylist{margin-top:.5rem}
     .payline{display:flex;justify-content:space-between;padding:.35rem 0;border-bottom:1px solid rgba(255,255,255,.08)}
     .payline:last-child{border-bottom:none}
     .result{margin-top:.6rem;padding:.7rem .9rem;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(91,211,154,.12);color:#9ff3cd;font-weight:700}
+    .subtle{color:var(--muted);margin-top:.2rem}
+    hr{border:none;height:1px;background:rgba(255,255,255,.1);margin:1rem 0}
   </style>
 </head>
 <body>
@@ -71,7 +77,8 @@
   <section class="card" id="card-calendar">
     <div class="info" title="Nápověda">ℹ️</div>
     <div class="tooltip">Klepni na den pro cyklus směny (12h: D→N→V→prázdno / 8h: R→O→N→V→prázdno).<br>
-      Přepni režim 12h/8h dole. Pozadí zap/vyp přepínačem „Pozadí aktivní“.</div>
+      Přepínač 12h/8h je níže. Svátky se počítají automaticky (vč. Velkého pátku a Velikonočního pondělí).<br>
+      Náhrady (svátek/dovolená) v 12h režimu = <b>11.25 h/den</b>.</div>
 
     <div id="bg-layer"></div>
     <div class="row" style="justify-content:space-between;align-items:center">
@@ -101,8 +108,9 @@
 
   <aside class="card" id="card-stats">
     <div class="info" title="Nápověda">ℹ️</div>
-    <div class="tooltip">Souhrn hodin za měsíc. U 12h směn: D přičítá 4 h odpoledních; N přičítá 4.25 h odpoledních + 8 h nočních. 
-      Víkend se počítá správně přes půlnoc. Svátek: směna + průměrná náhrada; noční před svátkem přičte 0–6 h svátku.</div>
+    <div class="tooltip">Vpravo zadáš sazby. 12h směna má reálně 12.25 h (odpracované),<br>
+      ale náhrady (svátek/dovolená) se počítají 11.25 h/den. 8h režim = 8.00 h.<br>
+      „Průměrná náhrada (Kč/h)“ se použije pro svátky i dovolenou. Můžeš ji buď spočítat níže ze 3 měsíců nebo zadat ručně.</div>
 
     <h3 style="margin-top:0">Statistiky měsíce</h3>
     <div id="stats" class="note"></div>
@@ -111,25 +119,47 @@
     <hr>
 
     <h3>Mzda (vstupy)</h3>
-    <label>Základní hodinovka</label><input id="rate_base" type="number">
+    <div class="info" title="Nápověda">ℹ️</div>
+    <div class="tooltip">Zadej základ a příplatky. Dole vyplň sekci „Průměrná náhrada“ (nebo ručně hodinovou částku). Používá se pro svátky a dovolenou.</div>
+
+    <label>Základní hodinovka</label><input id="rate_base" type="number" step="0.01">
     <div class="row" style="width:100%">
-      <div style="flex:1;min-width:140px"><label>Odpolední příplatek</label><input id="rate_odpo" type="number"></div>
-      <div style="flex:1;min-width:140px"><label>Noční příplatek</label><input id="rate_noc" type="number"></div>
+      <div style="flex:1;min-width:140px"><label>Odpolední příplatek</label><input id="rate_odpo" type="number" step="0.01"></div>
+      <div style="flex:1;min-width:140px"><label>Noční příplatek</label><input id="rate_noc" type="number" step="0.01"></div>
     </div>
     <div class="row" style="width:100%">
-      <div style="flex:1;min-width:140px"><label>Víkendový příplatek</label><input id="rate_vikend" type="number"></div>
-      <div style="flex:1;min-width:140px"><label>Nepřetržitý provoz</label><input id="rate_nepretrzity" type="number"></div>
+      <div style="flex:1;min-width:140px"><label>Víkendový příplatek</label><input id="rate_vikend" type="number" step="0.01"></div>
+      <div style="flex:1;min-width:140px"><label>Nepřetržitý provoz</label><input id="rate_nepretrzity" type="number" step="0.01"></div>
     </div>
+
     <div class="row" style="width:100%">
       <div style="flex:1;min-width:220px;display:flex;align-items:center;gap:.5rem">
         <input id="caf_check" type="checkbox">
         <label for="caf_check" style="margin:0">Docházkový bonus (Cafeterie 1000 Kč – mimo čistou)</label>
       </div>
     </div>
+
     <div class="row" style="width:100%">
-      <div style="flex:1;min-width:140px"><label>Přímé prémie (%)</label><input id="bonus_pct" type="number" value="10"></div>
-      <div style="flex:1;min-width:140px"><label>Roční motivační (Kč)</label><input id="annual_bonus" type="number" value="0"></div>
+      <div style="flex:1;min-width:140px"><label>Přímé prémie (%)</label><input id="bonus_pct" type="number" step="0.1" value="10"></div>
+      <div style="flex:1;min-width:140px"><label>Roční motivační (Kč)</label><input id="annual_bonus" type="number" step="1" value="0"></div>
     </div>
+
+    <hr>
+    <h3>Průměrná náhrada (poslední 3 měsíce)</h3>
+    <div class="row" style="width:100%">
+      <div style="flex:1;min-width:180px"><label>Čistá mzda M-1</label><input id="avg_net1" type="number" step="0.01"></div>
+      <div style="flex:1;min-width:180px"><label>Čistá mzda M-2</label><input id="avg_net2" type="number" step="0.01"></div>
+    </div>
+    <div class="row" style="width:100%">
+      <div style="flex:1;min-width:180px"><label>Hodiny M-1</label><input id="avg_h1" type="number" step="0.01"></div>
+      <div style="flex:1;min-width:180px"><label>Hodiny M-2</label><input id="avg_h2" type="number" step="0.01"></div>
+    </div>
+    <div class="row" style="width:100%">
+      <div style="flex:1;min-width:180px"><label>Čistá mzda M-3</label><input id="avg_net3" type="number" step="0.01"></div>
+      <div style="flex:1;min-width:180px"><label>Hodiny M-3</label><input id="avg_h3" type="number" step="0.01"></div>
+    </div>
+    <label>Ručně zadaná průměrná náhrada (Kč/h)</label><input id="avg_manual" type="number" step="0.01" placeholder="">
+    <div id="avg_info" class="subtle">Průměrná náhrada: 0,00 Kč</div>
 
     <div id="pay" class="paylist"></div>
 
@@ -140,6 +170,6 @@
   </aside>
 </div>
 
-<script src="app_v174.js?v=174"></script>
+<script src="app_v177.js?v=177"></script>
 </body>
 </html>

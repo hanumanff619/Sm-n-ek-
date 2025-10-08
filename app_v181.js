@@ -124,7 +124,7 @@ function bindInputsOnce(){
 
 function updateStats(){
   const y=current.getFullYear(), m=current.getMonth(), last=new Date(y,m+1,0);
-  const DAILY_WORKED = 12.25;
+  const DAILY_WORKED = 11.25
   const VAC12 = 11.25;
   const H8 = 8.0;
 

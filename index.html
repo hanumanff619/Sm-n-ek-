@@ -26,6 +26,7 @@
     .grid{display:grid;grid-template-columns:1fr;gap:.9rem}
     @media(min-width:1100px){.grid{grid-template-columns:1.5fr 1fr}}
     .card{background:var(--panel);border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.25);padding:1rem;position:relative}
+    /* Force help icon top-right */
     .info{position:absolute;top:10px;right:12px !important;left:auto !important;font-size:.9rem;opacity:.92;cursor:pointer}
     .tooltip{position:absolute;right:12px;left:auto;top:36px;max-width:380px;background:rgba(0,0,0,.86);
       border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:.6rem .7rem;font-size:.9rem;
@@ -81,7 +82,7 @@
   <section class="card" id="card-calendar">
     <div class="info" title="Nápověda">ℹ️</div>
     <div class="tooltip">Klepni na den pro cyklus směny (12h: D→N→V→prázdno / 8h: R→O→N→V→prázdno).<br>
-      Účtované hodiny: 12h směna = <b>11,25 h</b>. Dnešek je orámovaný. Státní svátky 🎌.</div>
+      Státní svátky se označí 🎌, dnešek je orámovaný. Pozadí reaguje na 8h/12h režim.</div>
 
     <div id="bg-layer"></div>
     <div class="row" style="justify-content:space-between;align-items:center">
@@ -105,12 +106,12 @@
 
   <aside class="card" id="card-stats">
     <div class="info" title="Nápověda">ℹ️</div>
-    <div class="tooltip">Zadej sazby. 12h směna = 11,25 h účtovaných. Náhrady (svátek/dovolená) 11,25 h/den. 8h režim = 8,00 h.</div>
+    <div class="tooltip">Zadej sazby. 12h směna má 12.25 h (odpracované), náhrady (svátek/dovolená) 11.25 h/den. 8h režim = 8.00 h.</div>
 
     <h3 style="margin-top:0">Statistiky měsíce</h3>
     <div id="stats" class="note"></div>
     <div id="substats" class="note" style="display:none"></div>
-    <p class="note">Obědy jen všední den při denní (12h: D; 8h: R). Dovolená: V = 11,25 h (12h) / 8,00 h (8h). Svátek: průměr.</p>
+    <p class="note">Obědy jen všední den při denní (12h: D; 8h: R). Dovolená: V = 11.25 h (12h) / 8.00 h (8h). Svátek: průměr.</p>
     <hr>
 
     <div class="h3wrap">
@@ -171,6 +172,6 @@
   </aside>
 </div>
 
-<script src="app_v182.js?v=182"></script>
+<script src="app_v181.js?v=181"></script>
 </body>
 </html>

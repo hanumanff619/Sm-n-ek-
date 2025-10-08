@@ -26,8 +26,8 @@
     .grid{display:grid;grid-template-columns:1fr;gap:.9rem}
     @media(min-width:1100px){.grid{grid-template-columns:1.5fr 1fr}}
     .card{background:var(--panel);border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.25);padding:1rem;position:relative}
-    /* Info icons aligned top-right consistently */
-    .info{position:absolute;top:10px;right:12px;font-size:.9rem;opacity:.92;cursor:pointer}
+    /* Force help icon top-right */
+    .info{position:absolute;top:10px;right:12px !important;left:auto !important;font-size:.9rem;opacity:.92;cursor:pointer}
     .tooltip{position:absolute;right:12px;left:auto;top:36px;max-width:380px;background:rgba(0,0,0,.86);
       border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:.6rem .7rem;font-size:.9rem;
       opacity:0;pointer-events:none;transform:translateY(-4px);transition:opacity .18s ease, transform .18s ease;
@@ -35,12 +35,12 @@
     .info:hover + .tooltip{opacity:1;pointer-events:auto;transform:translateY(0)}
     .tooltip b{color:#bfe1ff}
     #card-calendar{position:relative;overflow:hidden}
-    #bg-layer{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.38;filter:contrast(1.08) brightness(.95);pointer-events:none}
+    #bg-layer{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.34;filter:contrast(1.08) brightness(.95);pointer-events:none}
     #card-calendar > *:not(#bg-layer){position:relative}
     .calendar{width:100%;border-collapse:collapse}
     .calendar th,.calendar td{border:1px solid rgba(255,255,255,.08);padding:.35rem;vertical-align:top}
     .calendar th{color:var(--muted);font-weight:600;text-align:center;background:rgba(14,38,70,.45)}
-    .calendar td{height:92px;position:relative;background:rgba(15,39,72,.28);transition:background .15s ease}
+    .calendar td{height:92px;position:relative;background:rgba(15,39,72,.26);transition:background .15s ease}
     .calendar td.selected{background:var(--sel)!important;box-shadow:inset 0 0 0 2px #75c7ff99}
     .calendar td.today:not(.selected){box-shadow:inset 0 0 0 2px rgba(108,192,255,.75)}
     .daynum{position:absolute;top:.35rem;right:.35rem;color:var(--muted);font-size:.85rem;text-shadow:0 1px 1px rgba(0,0,0,.35)}
@@ -62,7 +62,7 @@
     .subtle{color:var(--muted);margin-top:.2rem}
     hr{border:none;height:1px;background:rgba(255,255,255,.1);margin:1rem 0}
     .h3wrap{display:flex;align-items:center;gap:.4rem;position:relative}
-    .h3wrap .info{position:static;margin-left:auto}
+    .h3wrap .info{position:static;margin-left:auto !important}
     .h3wrap .tooltip{right:0;left:auto;top:2.1rem}
   </style>
 </head>
@@ -82,7 +82,7 @@
   <section class="card" id="card-calendar">
     <div class="info" title="Nápověda">ℹ️</div>
     <div class="tooltip">Klepni na den pro cyklus směny (12h: D→N→V→prázdno / 8h: R→O→N→V→prázdno).<br>
-      Svátky (státní) i jmeniny se zobrazují automaticky. Náhrady v 12h režimu = <b>11.25 h/den</b>.</div>
+      Státní svátky se označí 🎌, dnešek je orámovaný. Pozadí reaguje na 8h/12h režim.</div>
 
     <div id="bg-layer"></div>
     <div class="row" style="justify-content:space-between;align-items:center">
@@ -172,6 +172,6 @@
   </aside>
 </div>
 
-<script src="app_v180.js?v=180"></script>
+<script src="app_v181.js?v=181"></script>
 </body>
 </html>

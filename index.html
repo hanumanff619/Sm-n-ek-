@@ -9,46 +9,39 @@
   <link rel="icon" href="icons/icon-192.png">
   <style>
     :root{
-      --bg:#0c1d33; --panel:#122e52; --ink:#eaf2ff; --muted:#a9c3e6; --accent:#6cc0ff;
+      --bg:#0b1b31; --panel:#122e52; --ink:#eaf2ff; --muted:#a9c3e6; --accent:#6cc0ff;
       --sel:#1e78d799; --good:#5bd39a; --goodtext:#9ff3cd; --field:#0b213d; --border:#1f3f66;
     }
-    body.mode8{ --accent:#b38cff; --sel:#7b3ff299; }
     html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto}
     *{box-sizing:border-box}
     header{position:sticky;top:0;z-index:5;background:linear-gradient(180deg,rgba(12,29,51,.95),rgba(12,29,51,.7));backdrop-filter:blur(6px)}
     .head{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:.7rem 1rem}
     .logo{font-size:2rem;line-height:1}
     h1{margin:.2rem 0 0 0;font-size:1.25rem}
-    .todayBox{width:100%;max-width:1200px;padding:.4rem 1rem 0 1rem}
+    .todayBox{width:100%;max-width:1200px;padding:.2rem 1rem .6rem 1rem}
     .todayLine{color:var(--goodtext);font-weight:700}
     .todayLine + .todayLine{margin-top:.15rem}
     .wrap{max-width:1200px;margin:0 auto;padding:1rem}
     .grid{display:grid;grid-template-columns:1fr;gap:.9rem}
     @media(min-width:1100px){.grid{grid-template-columns:1.5fr 1fr}}
     .card{background:var(--panel);border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.25);padding:1rem;position:relative}
-    .info{position:absolute;top:10px;right:12px !important;left:auto !important;font-size:.9rem;opacity:.92;cursor:pointer}
-    .tooltip{position:absolute;right:12px;left:auto;top:36px;max-width:380px;background:rgba(0,0,0,.86);
+    .info{position:absolute;top:10px;right:12px;font-size:.9rem;opacity:.92;cursor:pointer}
+    .tooltip{position:absolute;right:12px;top:36px;max-width:380px;background:rgba(0,0,0,.86);
       border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:.6rem .7rem;font-size:.9rem;
-      opacity:0;pointer-events:none;transform:translateY(-4px);transition:opacity .18s ease, transform .18s ease;
-      transition-delay:.45s}
+      opacity:0;pointer-events:none;transform:translateY(-4px);transition:opacity .18s ease, transform .18s ease;transition-delay:.45s}
     .info:hover + .tooltip{opacity:1;pointer-events:auto;transform:translateY(0)}
     .tooltip b{color:#bfe1ff}
     #card-calendar{position:relative;overflow:hidden}
-    #bg-layer{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.34;filter:contrast(1.08) brightness(.95);pointer-events:none}
+    #bg-layer{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.30;filter:contrast(1.06) brightness(.95);pointer-events:none}
     #card-calendar > *:not(#bg-layer){position:relative}
     .calendar{width:100%;border-collapse:collapse}
     .calendar th,.calendar td{border:1px solid rgba(255,255,255,.08);padding:.35rem;vertical-align:top}
     .calendar th{color:var(--muted);font-weight:600;text-align:center;background:rgba(14,38,70,.45)}
-    .calendar td{height:92px;position:relative;background:rgba(15,39,72,.26);transition:background .15s ease}
+    .calendar td{height:92px;position:relative;background:rgba(15,39,72,.18);transition:background .15s ease}
     .calendar td.selected{background:var(--sel)!important;box-shadow:inset 0 0 0 2px #75c7ff99}
     .calendar td.today:not(.selected){box-shadow:inset 0 0 0 2px rgba(108,192,255,.75)}
     .daynum{position:absolute;top:.35rem;right:.35rem;color:var(--muted);font-size:.85rem;text-shadow:0 1px 1px rgba(0,0,0,.35)}
     .badge{display:inline-block;margin-top:1.2rem;padding:.2rem .5rem;border-radius:8px;font-size:.85rem;background:rgba(0,0,0,.18)}
-    .D{background:linear-gradient(180deg,rgba(108,192,255,.12),rgba(108,192,255,.10))}
-    .N{background:linear-gradient(180deg,rgba(255,188,104,.12),rgba(255,188,104,.10))}
-    .V{background:linear-gradient(180deg,rgba(119,214,139,.14),rgba(119,214,139,.10))}
-    .R{background:linear-gradient(180deg,rgba(108,192,255,.12),rgba(108,192,255,.10))}
-    .O{background:linear-gradient(180deg,rgba(255,188,104,.12),rgba(255,188,104,.10))}
     .row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
     .chip{padding:.3rem .7rem;border:1px solid rgba(255,255,255,.12);border-radius:99px;background:transparent;color:var(--ink);cursor:pointer}
     label{display:block;margin:.45rem 0 .25rem}
@@ -61,8 +54,8 @@
     .subtle{color:var(--muted);margin-top:.2rem}
     hr{border:none;height:1px;background:rgba(255,255,255,.1);margin:1rem 0}
     .h3wrap{display:flex;align-items:center;gap:.4rem;position:relative}
-    .h3wrap .info{position:static;margin-left:auto !important}
-    .h3wrap .tooltip{right:0;left:auto;top:2.1rem}
+    .h3wrap .info{position:static;margin-left:auto}
+    .h3wrap .tooltip{right:0;top:2.1rem}
   </style>
 </head>
 <body>
@@ -81,7 +74,7 @@
   <section class="card" id="card-calendar">
     <div class="info" title="Nápověda">ℹ️</div>
     <div class="tooltip">Klepni na den pro cyklus směny (12h: D→N→V→prázdno / 8h: R→O→N→V→prázdno).<br>
-      Účtované hodiny: 12h směna = <b>11,25 h</b>. Dnešek je orámovaný. Státní svátky 🎌.</div>
+      12h směna = <b>11,25 h</b> účtováno. Dnešek je orámovaný. Státní svátky 🎌.</div>
 
     <div id="bg-layer"></div>
     <div class="row" style="justify-content:space-between;align-items:center">
@@ -105,7 +98,7 @@
 
   <aside class="card" id="card-stats">
     <div class="info" title="Nápověda">ℹ️</div>
-    <div class="tooltip">Zadej sazby. 12h směna = 11,25 h účtovaných. Náhrady (svátek/dovolená) 11,25 h/den. 8h režim = 8,00 h.</div>
+    <div class="tooltip">Zadej sazby. Dole průměrná náhrada (ručně / z M-1..M-3). Svátek i dovolená se počítají tímto průměrem.</div>
 
     <h3 style="margin-top:0">Statistiky měsíce</h3>
     <div id="stats" class="note"></div>
@@ -116,7 +109,7 @@
     <div class="h3wrap">
       <h3 style="margin:0">Mzda (vstupy)</h3>
       <div class="info" title="Nápověda">ℹ️</div>
-      <div class="tooltip">Základ + příplatky. Dole vyplň „Průměrná náhrada“ (nebo ručně Kč/h). Používá se pro svátky a dovolenou.</div>
+      <div class="tooltip">Základ + příplatky + prémie. Motivační červen/listopad se započte jen v těch měsících.</div>
     </div>
 
     <label>Základní hodinovka</label><input id="rate_base" type="number" step="0.01">
@@ -154,7 +147,7 @@
     <div class="h3wrap">
       <h3 style="margin:0">Stravenky / Obědy</h3>
       <div class="info" title="Nápověda">ℹ️</div>
-      <div class="tooltip">Zapni „automaticky“ pro výpočet podle kalendáře. Vypni a vyplň počty ručně. „Nevybrané obědy“ odečtou jen srážku oběda.</div>
+      <div class="tooltip">Automatika podle kalendáře nebo ručně. „Nevybrané obědy“ odečtou jen srážku oběda.</div>
     </div>
     <div class="row" style="width:100%">
       <label style="display:flex;align-items:center;gap:.5rem;margin:0">
@@ -200,6 +193,6 @@
   </aside>
 </div>
 
-<script src="app_v190.js?v=190"></script>
+<script src="app_v192.js?v=192"></script>
 </body>
 </html>

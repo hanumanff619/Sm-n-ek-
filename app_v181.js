@@ -366,3 +366,212 @@ function recalculateWage() {
   const net = base - deductions;
   console.log("Čistá mzda:", net.toFixed(2), window.activeCurrency || "Kč");
 }
+/* ======= Směnářek 1.9.3 – i18n + měna + (volitelně) daňová lokalita ======= */
+(function initI18N() {
+  // 1) Slovník klíčů (odpovídají data-i18n v index.html)
+  const I18N = {
+    cs: {
+      title:"Směnářek",
+      today:"Dnes:",
+      nameday:"Svátek:",
+      btnToday:"Dnes",
+      btnClear:"Vymazat den",
+      calendar:"Kalendář",
+      calHelpTitle:"Jak používat kalendář",
+      calHelpBody:"Klepni na den pro přepnutí směny (D/N/V/R). Dlouhý stisk = smazat. Šipkami měníš měsíc, „Dnes“ skočí na aktuální datum.",
+      settings:"Nastavení",
+      settingsHelpTitle:"Nastavení aplikace",
+      settingsHelpBody:"Zvol režim směn (12h nebo 8h), jazyk a měnu. Změny se uloží do zařízení.",
+      shiftMode:"Režim směn:",
+      mode12:"12 h (D/N/V)",
+      mode8:"8 h (R/O/N/V)",
+      language:"Jazyk:",
+      currency:"Měna:",
+      monthStats:"Statistiky měsíce",
+      rules:"Obědy jen všední den při denní (12h: D; 8h: R). Dovolená = nastavené hodiny/den. Svátek: směna + průměr.",
+      wageInputs:"Mzda (vstupy)",
+      baseRate:"Základní hodinovka",
+      aftBonus:"Odpolední příplatek",
+      nightBonus:"Noční příplatek",
+      weekendBonus:"Víkendový příplatek",
+      holidayWorked:"Svátek (Kč/h) – odpracovaný",
+      continuousBonus:"Nepřetržitý provoz",
+      directBonus:"Přímé prémie (%)",
+      cafeteriaBonus:"Docházkový bonus (Cafeterie 1000 Kč – mimo čistou)",
+      annualMotiv:"Roční motivační (Kč)",
+      vacPerDay:"Dovolená (hod/den)",
+      avgHeader:"Průměrná náhrada (poslední 3 měsíce)",
+      avgHelpTitle:"Jak počítáme průměr",
+      avgHelpBody:"Zadej čisté mzdy a odpracované hodiny za poslední 3 měsíce nebo ručně vyplň průměr (Kč/h). Výsledek se použije pro svátky a dovolenou.",
+      netM1:"Čistá mzda M-1", netM2:"Čistá mzda M-2", netM3:"Čistá mzda M-3",
+      hoursM1:"Hodiny M-1", hoursM2:"Hodiny M-2", hoursM3:"Hodiny M-3",
+      manualAvg:"Ručně zadaná průměrná náhrada (Kč/h)",
+      avgResult:"Průměrná náhrada:",
+      gross:"Hrubá mzda:",
+      netEst:"Čistá mzda (odhad):",
+      vouchers:"Stravenky:",
+      cafeteriaOut:"Cafeterie (mimo čistou):"
+    },
+    en: {
+      title:"Shifty",
+      today:"Today:",
+      nameday:"Name day:",
+      btnToday:"Today",
+      btnClear:"Clear day",
+      calendar:"Calendar",
+      calHelpTitle:"How to use the calendar",
+      calHelpBody:"Tap a day to toggle shift (D/N/V/R). Long-press = clear. Arrows change month, “Today” jumps to current date.",
+      settings:"Settings",
+      settingsHelpTitle:"App settings",
+      settingsHelpBody:"Choose shift mode (12h or 8h), language and currency. Changes are saved to your device.",
+      shiftMode:"Shift mode:",
+      mode12:"12 h (D/N/V)",
+      mode8:"8 h (R/O/N/V)",
+      language:"Language:",
+      currency:"Currency:",
+      monthStats:"Month statistics",
+      rules:"Meals only on weekdays for day shift (12h: D; 8h: R). Vacation = configured hours/day. Holiday: shift + average.",
+      wageInputs:"Wage (inputs)",
+      baseRate:"Base hourly rate",
+      aftBonus:"Afternoon bonus",
+      nightBonus:"Night bonus",
+      weekendBonus:"Weekend bonus",
+      holidayWorked:"Holiday (per hour) – worked",
+      continuousBonus:"Continuous operation",
+      directBonus:"Direct bonus (%)",
+      cafeteriaBonus:"Attendance bonus (Cafeteria 1000 – outside net)",
+      annualMotiv:"Annual motivational (amount)",
+      vacPerDay:"Vacation (hours/day)",
+      avgHeader:"Average compensation (last 3 months)",
+      avgHelpTitle:"How the average is calculated",
+      avgHelpBody:"Enter net wages and hours for last 3 months or fill manual average (per hour). Used for holidays and vacation.",
+      netM1:"Net M-1", netM2:"Net M-2", netM3:"Net M-3",
+      hoursM1:"Hours M-1", hoursM2:"Hours M-2", hoursM3:"Hours M-3",
+      manualAvg:"Manual average compensation (per hour)",
+      avgResult:"Average compensation:",
+      gross:"Gross wage:",
+      netEst:"Net wage (estimate):",
+      vouchers:"Meal vouchers:",
+      cafeteriaOut:"Cafeteria (outside net):"
+    },
+    de: {
+      title:"Schichtler",
+      today:"Heute:",
+      nameday:"Namenstag:",
+      btnToday:"Heute",
+      btnClear:"Tag löschen",
+      calendar:"Kalender",
+      calHelpTitle:"Kalender benutzen",
+      calHelpBody:"Tippe auf einen Tag zum Wechseln (D/N/V/R). Langdruck = löschen. Pfeile wechseln den Monat, „Heute“ springt zum aktuellen Datum.",
+      settings:"Einstellungen",
+      settingsHelpTitle:"App-Einstellungen",
+      settingsHelpBody:"Wähle Schichtmodus (12h oder 8h), Sprache und Währung. Änderungen werden lokal gespeichert.",
+      shiftMode:"Schichtmodus:",
+      mode12:"12 h (D/N/V)",
+      mode8:"8 h (R/O/N/V)",
+      language:"Sprache:",
+      currency:"Währung:",
+      monthStats:"Monatsstatistik",
+      rules:"Essen nur werktags bei Tagschicht (12h: D; 8h: R). Urlaub = konfigurierte Stunden/Tag. Feiertag: Schicht + Durchschnitt.",
+      wageInputs:"Lohn (Eingaben)",
+      baseRate:"Grundstundensatz",
+      aftBonus:"Spätschicht-Zuschlag",
+      nightBonus:"Nachtschicht-Zuschlag",
+      weekendBonus:"Wochenend-Zuschlag",
+      holidayWorked:"Feiertag (pro Std) – gearbeitet",
+      continuousBonus:"Kontinuierlicher Betrieb",
+      directBonus:"Direktprämie (%)",
+      cafeteriaBonus:"Anwesenheitsbonus (Cafeteria 1000 – außerhalb netto)",
+      annualMotiv:"Jährlicher Bonus (Betrag)",
+      vacPerDay:"Urlaub (Std/Tag)",
+      avgHeader:"Durchschnittsausgleich (letzte 3 Monate)",
+      avgHelpTitle:"So berechnen wir den Durchschnitt",
+      avgHelpBody:"Gib Nettolöhne und Stunden der letzten 3 Monate ein oder den manuellen Durchschnitt (pro Std). Für Feiertage/Urlaub verwendet.",
+      netM1:"Netto M-1", netM2:"Netto M-2", netM3:"Netto M-3",
+      hoursM1:"Stunden M-1", hoursM2:"Stunden M-2", hoursM3:"Stunden M-3",
+      manualAvg:"Manueller Durchschnitt (pro Std)",
+      avgResult:"Durchschnitt:",
+      gross:"Bruttolohn:",
+      netEst:"Nettolohn (Schätzung):",
+      vouchers:"Essensmarken:",
+      cafeteriaOut:"Cafeteria (außerhalb netto):"
+    }
+  };
+
+  // 2) Měny
+  const CURRENCY_FMT = {
+    CZK: { locale: 'cs-CZ', code: 'CZK' },
+    EUR: { locale: 'de-DE', code: 'EUR' },
+    USD: { locale: 'en-US', code: 'USD' }
+  };
+  window.fmtCurrency = function(amount, code) {
+    const c = code || (window.activeCurrency || 'CZK');
+    const cfg = CURRENCY_FMT[c] || CURRENCY_FMT.CZK;
+    try { return new Intl.NumberFormat(cfg.locale, { style:'currency', currency: cfg.code }).format(+amount||0); }
+    catch { return ((+amount||0).toFixed(2) + ' ' + (cfg.code)); }
+  };
+
+  // 3) Aplikace překladu
+  function applyLanguage(lang) {
+    const dict = I18N[lang] || I18N.cs;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const k = el.getAttribute('data-i18n');
+      if (dict[k] != null) el.textContent = dict[k];
+    });
+    document.title = dict.title || 'Směnářek';
+  }
+
+  // 4) Načtení/uložení nastavení (jazyk, měna, (volitelně) daňová lokalita)
+  function readSettings() {
+    try { return JSON.parse(localStorage.getItem('smenarekSettings') || '{}'); }
+    catch { return {}; }
+  }
+  function writeSettings(s) {
+    localStorage.setItem('smenarekSettings', JSON.stringify(s||{}));
+  }
+
+  function applySettingsToUI(s) {
+    // Jazyk + měna
+    const lang = s.language || 'cs';
+    const cur  = s.currency || (lang==='de' ? 'EUR' : 'CZK');
+    window.activeCurrency = cur;
+    applyLanguage(lang);
+
+    // Volitelně daňová lokalita (když máš <select id="taxLocale">)
+    if (s.taxLocale) window.taxLocale = s.taxLocale;
+
+    // Po přepnutí přepočítej výstupy, pokud máš funkce:
+    if (typeof window.renderResults === 'function') window.renderResults();
+    else if (typeof window.recalculateWage === 'function') window.recalculateWage();
+  }
+
+  // 5) Injektuj listenery na selecty (pokud existují)
+  function bindControls() {
+    const langSel = document.getElementById('langSelect');
+    const curSel  = document.getElementById('currencySelect');
+    const taxSel  = document.getElementById('taxLocale'); // může i nebýt
+
+    if (langSel) langSel.addEventListener('change', e => {
+      const s = readSettings(); s.language = e.target.value; writeSettings(s); applySettingsToUI(s);
+    });
+    if (curSel) curSel.addEventListener('change', e => {
+      const s = readSettings(); s.currency = e.target.value; writeSettings(s); applySettingsToUI(s);
+    });
+    if (taxSel) taxSel.addEventListener('change', e => {
+      const s = readSettings(); s.taxLocale = e.target.value; writeSettings(s); applySettingsToUI(s);
+    });
+  }
+
+  // 6) Start
+  window.addEventListener('DOMContentLoaded', () => {
+    bindControls();
+    const saved = readSettings();
+
+    // Výchozí měna podle jazyka (DE → EUR, jinak CZK), pokud není uloženo
+    if (!saved.language) saved.language = 'cs';
+    if (!saved.currency) saved.currency = (saved.language==='de') ? 'EUR' : 'CZK';
+
+    writeSettings(saved);
+    applySettingsToUI(saved);
+  });
+})();

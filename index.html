@@ -194,6 +194,109 @@
     closeBtn?.addEventListener('click', hideModal);
     cancelBtn?.addEventListener('click', hideModal);
     modal?.addEventListener('click', (e)=>{ if(e.target===modal) hideModal(); });
-  </script>
+  <script>
+/* Směnářek 2.0 – Failsafe bootstrap (nezávislý na app_v2.js) */
+(function(){
+  const $=s=>document.querySelector(s), C=(tag,attrs={})=>Object.assign(document.createElement(tag),attrs);
+  console.log('[Směnářek 2.0] Failsafe start');
+
+  /* 1) Modal – otevření/zavření i když máš jiné ID */
+  const modal = document.getElementById('settingsModal') || (function(){
+    const m=C('div',{id:'settingsModal',style:'position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.45);z-index:30'});
+    const sheet=C('div',{className:'sheet',style:'width:min(760px,92vw);max-height:88vh;overflow:auto;background:#122e52;border-radius:18px;padding:1rem'});
+    sheet.append(C('div',{innerHTML:'<h3 style="margin:0">Nastavení (provizorní)</h3>'}));
+    m.append(sheet); document.body.append(m); return m;
+  })();
+
+  function showModal(){ modal.style.display='flex'; modal.setAttribute('aria-hidden','false'); }
+  function hideModal(){ modal.style.display='none'; modal.setAttribute('aria-hidden','true'); }
+
+  const openBtn = document.getElementById('openSettings') || (function(){
+    // doplň tlačítko do topbaru, pokud chybí
+    const tb = document.querySelector('.topbar') || document.body;
+    const b=C('button',{id:'openSettings',className:'btn',textContent:'⚙️ Nastavení'});
+    tb.append(b); return b;
+  })();
+  const btnClose = document.getElementById('btnClose');
+  const btnCancel= document.getElementById('btnCancel');
+
+  openBtn.addEventListener('click', showModal);
+  btnClose && btnClose.addEventListener('click', hideModal);
+  btnCancel && btnCancel.addEventListener('click', hideModal);
+  modal.addEventListener('click', e=>{ if(e.target===modal) hideModal(); });
+
+  /* 2) Dnes + jmeniny */
+  function pad2(n){return String(n).padStart(2,'0');}
+  const today = new Date();
+  (document.getElementById('todayShift')||document.getElementById('todayLine')||C('span')).textContent =
+    `Dnes: ${pad2(today.getDate())}.${pad2(today.getMonth()+1)}.${today.getFullYear()}`;
+
+  fetch('namedays_cs.json?v=2.0').then(r=>r.ok?r.json():{}).then(map=>{
+    const key = `${pad2(today.getMonth()+1)}-${pad2(today.getDate())}`;
+    const name = (map||{})[key] || '—';
+    const nd = document.getElementById('todayNameday') || document.getElementById('todayName');
+    if(nd) nd.textContent = name;
+  }).catch(()=>{});
+
+  /* 3) Kalendář – když není, tak ho vytvoř */
+  const host = document.getElementById('calendar') || document.getElementById('calendarHost') || (function(){
+    const sec = document.getElementById('card-calendar') || document.body;
+    const d=C('div',{id:'calendar'}); sec.append(d); return d;
+  })();
+
+  const monthLabel = document.getElementById('monthLabel') || document.getElementById('monthName') || (function(){
+    const h=C('button',{id:'monthLabel',className:'btn'}); h.textContent='—'; 
+    const nav = (host.parentElement && host.parentElement.querySelector('.row')) || host.parentElement || document.body;
+    nav.insertBefore(h, nav.firstChild); return h;
+  })();
+
+  const prev = document.getElementById('prevMonth') || document.getElementById('prevBtn') || (function(){
+    const b=C('button',{id:'prevMonth',className:'btn',textContent:'←'}); monthLabel.before(b); return b;
+  })();
+  const next = document.getElementById('nextMonth') || document.getElementById('nextBtn') || (function(){
+    const b=C('button',{id:'nextMonth',className:'btn',textContent:'→'}); monthLabel.after(b); return b;
+  })();
+
+  let YM = new Date(today.getFullYear(), today.getMonth(), 1);
+
+  function renderMiniCal(){
+    const y=YM.getFullYear(), m=YM.getMonth();
+    monthLabel.textContent = YM.toLocaleDateString('cs', {month:'long', year:'numeric'});
+    const first = new Date(y,m,1), last = new Date(y,m+1,0);
+    const start = new Date(first); start.setDate(1 - ((first.getDay()+6)%7)); // pondělí jako 1.
+    let cur = start;
+    let html = '<table style="width:100%;border-collapse:collapse;background:rgba(255,255,255,.05);border-radius:12px;overflow:hidden">' +
+               '<thead><tr>';
+    const wd = [...Array(7)].map((_,i)=> new Date(2025,6,i+7).toLocaleDateString('cs',{weekday:'short'}));
+    wd.forEach(w=>html+=`<th style="padding:.4rem;color:#9fb9d4">${w}</th>`);
+    html += '</tr></thead><tbody>';
+
+    const todayKey = today.toISOString().slice(0,10);
+    while (cur <= last || (cur.getDay()+6)%7 !== 0){
+      html += '<tr>';
+      for(let i=0;i<7;i++){
+        const key = cur.toISOString().slice(0,10);
+        const inMonth = cur.getMonth()===m;
+        const isToday = key===todayKey;
+        html += `<td style="height:62px;border:1px solid rgba(255,255,255,.08);vertical-align:top;
+                 ${inMonth?'':'opacity:.45;'}
+                 ${isToday?'outline:2px solid #4ea3ff;':''}
+                 padding:.35rem .4rem">
+                  <div style="text-align:right;color:#9fb9d4">${cur.getDate()}</div>
+                 </td>`;
+        cur.setDate(cur.getDate()+1);
+      }
+      html += '</tr>';
+    }
+    html += '</tbody></table>';
+    host.innerHTML = html;
+  }
+  renderMiniCal();
+  prev.addEventListener('click', ()=>{ YM.setMonth(YM.getMonth()-1); renderMiniCal(); });
+  next.addEventListener('click', ()=>{ YM.setMonth(YM.getMonth()+1); renderMiniCal(); });
+
+  console.log('[Směnářek 2.0] Failsafe ready');
+})();
+</script>
 </body>
 </html>

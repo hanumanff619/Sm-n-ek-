@@ -1,10 +1,10 @@
 {
   "name": "Směnářek",
   "short_name": "Směnářek",
-  "start_url": "./",
+  "start_url": ".",
   "display": "standalone",
-  "background_color": "#0b1e38",
-  "theme_color": "#0b1e38",
+  "background_color": "#0c1d33",
+  "theme_color": "#102a4a",
   "icons": [
     {
       "src": "icons/icon-192.png",

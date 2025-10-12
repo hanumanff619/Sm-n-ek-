@@ -1,7 +1,7 @@
 {
   "name": "Směnářek",
   "short_name": "Směnářek",
-  "start_url": ".",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#0b1e38",
   "theme_color": "#0b1e38",

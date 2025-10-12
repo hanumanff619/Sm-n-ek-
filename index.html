@@ -173,109 +173,229 @@
 </style>
 <header>
   <div class="head">
-    <div class="logo">📆</div>
-    <h1>Směnářek</h1>
-  </div>
-  <div class="todayBox">
-    <div id="todayShift" class="todayLine">Dnes: —</div>
-    <div id="todayNameday" class="todayLine">Svátek: —</div>
+    <div class="logo">
+      <h1 data-i18n="title">Směnářek</h1>
+    </div>
+
+    <div class="todayBox">
+      <div class="todayLine">
+        <strong data-i18n="today">Dnes:</strong>
+        <span id="todayShift"></span>
+      </div>
+      <div class="todayLine">
+        <strong data-i18n="nameday">Svátek:</strong>
+        <span id="todayName"></span>
+      </div>
+    </div>
+
+    <div class="buttons">
+      <button id="goToday" data-i18n="btnToday">Dnes</button>
+      <button id="clearDay" data-i18n="btnClear">Vymazat den</button>
+    </div>
   </div>
 </header>
 
-<div class="wrap grid">
-  <section class="card" id="card-calendar">
-    <div class="info" title="Nápověda">ℹ️</div>
-    <div class="tooltip">Klepni na den pro cyklus směny (12h: D→N→V→prázdno / 8h: R→O→N→V→prázdno).<br>
-      Státní svátky se označí 🎌, dnešek je orámovaný. Pozadí reaguje na 8h/12h režim.</div>
-
+<main class="wrap">
+  <!-- KALENDÁŘ -->
+  <div class="card" id="card-calendar">
     <div id="bg-layer"></div>
-    <div class="row" style="justify-content:space-between;align-items:center">
-      <div class="row">
-        <button class="chip" id="prev">&larr;</button>
-        <div id="monthLabel" class="chip"></div>
-        <button class="chip" id="next">&rarr;</button>
-      </div>
-      <div class="row">
-        <button class="chip" id="setToday">Dnes</button>
-        <button class="chip" id="clearDay">Vymazat den</button>
-      </div>
-    </div>
-    <table class="calendar" id="cal"></table>
-    <div class="row" style="margin-top:.6rem;justify-content:flex-start;align-items:center">
-      <span class="chip">Režim směn:</span>
-      <button class="chip" id="mode12">12 h (D/N/V)</button>
-      <button class="chip" id="mode8">8 h (R/O/N/V)</button>
-    </div>
-  </section>
-
-  <aside class="card" id="card-stats">
-    <div class="info" title="Nápověda">ℹ️</div>
-    <div class="tooltip">Zadej sazby. 12h směna má 12.25 h (odpracované), náhrady (svátek/dovolená) 11.25 h/den. 8h režim = 8.00 h.</div>
-
-    <h3 style="margin-top:0">Statistiky měsíce</h3>
-    <div id="stats" class="note"></div>
-    <div id="substats" class="note" style="display:none"></div>
-    <p class="note">Obědy jen všední den při denní (12h: D; 8h: R). Dovolená: V = 11.25 h (12h) / 8.00 h (8h). Svátek: průměr.</p>
-    <hr>
 
     <div class="h3wrap">
-      <h3 style="margin:0">Mzda (vstupy)</h3>
-      <div class="info" title="Nápověda">ℹ️</div>
-      <div class="tooltip">Základ + příplatky. Dole vyplň „Průměrná náhrada“ (nebo ručně Kč/h). Používá se pro svátky a dovolenou.</div>
-    </div>
-
-    <label>Základní hodinovka</label><input id="rate_base" type="number" step="0.01">
-    <div class="row" style="width:100%">
-      <div style="flex:1;min-width:140px"><label>Odpolední příplatek</label><input id="rate_odpo" type="number" step="0.01"></div>
-      <div style="flex:1;min-width:140px"><label>Noční příplatek</label><input id="rate_noc" type="number" step="0.01"></div>
-    </div>
-    <div class="row" style="width:100%">
-      <div style="flex:1;min-width:140px"><label>Víkendový příplatek</label><input id="rate_vikend" type="number" step="0.01"></div>
-      <div style="flex:1;min-width:140px"><label>Nepřetržitý provoz</label><input id="rate_nepretrzity" type="number" step="0.01"></div>
-    </div>
-
-    <div class="row" style="width:100%">
-      <div style="flex:1;min-width:220px;display:flex;align-items:center;gap:.5rem">
-        <input id="caf_check" type="checkbox">
-        <label for="caf_check" style="margin:0">Docházkový bonus (Cafeterie 1000 Kč – mimo čistou)</label>
+      <h3 data-i18n="calendar">Kalendář</h3>
+      <span class="info" aria-label="info">ℹ️</span>
+      <div class="tooltip">
+        <b data-i18n="calHelpTitle">Jak používat kalendář</b><br>
+        <span data-i18n="calHelpBody">
+          Klepni na den pro přepnutí směny (D/N/V/R). Dlouhý stisk = smazat.
+          Šipkami měníš měsíc, „Dnes“ skočí na aktuální datum.
+        </span>
       </div>
     </div>
 
-    <div class="row" style="width:100%">
-      <div style="flex:1;min-width:140px"><label>Přímé prémie (%)</label><input id="bonus_pct" type="number" step="0.1" value="10"></div>
-      <div style="flex:1;min-width:140px"><label>Roční motivační (Kč)</label><input id="annual_bonus" type="number" step="1" value="0"></div>
+    <div class="row">
+      <button id="prevMonth" aria-label="Prev">←</button>
+      <div id="monthLabel"></div>
+      <button id="nextMonth" aria-label="Next">→</button>
+      <button id="btnTodayTop" data-i18n="btnToday">Dnes</button>
+      <button id="clearDayTop" data-i18n="btnClear">Vymazat den</button>
     </div>
 
-    <hr>
+    <table class="calendar" id="calendar"></table>
+  </div>
+
+  <!-- NASTAVENÍ -->
+  <div class="card" id="card-settings">
     <div class="h3wrap">
-      <h3 style="margin:0">Průměrná náhrada (poslední 3 měsíce)</h3>
-      <div class="info" title="Nápověda">ℹ️</div>
-      <div class="tooltip">Zadej čisté mzdy a hodiny za poslední 3 měsíce. Průměr = (součet čistých)/(součet hodin). Ruční hodnota má přednost.</div>
+      <h3 data-i18n="settings">Nastavení</h3>
+      <span class="info">ℹ️</span>
+      <div class="tooltip">
+        <b data-i18n="settingsHelpTitle">Nastavení aplikace</b><br>
+        <span data-i18n="settingsHelpBody">
+          Zvol režim směn (12h nebo 8h), jazyk a měnu. Změny se uloží do zařízení.
+        </span>
+      </div>
     </div>
-    <div class="row" style="width:100%">
-      <div style="flex:1;min-width:180px"><label>Čistá mzda M-1</label><input id="avg_net1" type="number" step="0.01"></div>
-      <div style="flex:1;min-width:180px"><label>Čistá mzda M-2</label><input id="avg_net2" type="number" step="0.01"></div>
-    </div>
-    <div class="row" style="width:100%">
-      <div style="flex:1;min-width:180px"><label>Hodiny M-1</label><input id="avg_h1" type="number" step="0.01"></div>
-      <div style="flex:1;min-width:180px"><label>Hodiny M-2</label><input id="avg_h2" type="number" step="0.01"></div>
-    </div>
-    <div class="row" style="width:100%">
-      <div style="flex:1;min-width:180px"><label>Čistá mzda M-3</label><input id="avg_net3" type="number" step="0.01"></div>
-      <div style="flex:1;min-width:180px"><label>Hodiny M-3</label><input id="avg_h3" type="number" step="0.01"></div>
-    </div>
-    <label>Ručně zadaná průměrná náhrada (Kč/h)</label><input id="avg_manual" type="number" step="0.01" placeholder="">
-    <div id="avg_info" class="subtle">Průměrná náhrada: 0,00 Kč</div>
 
-    <div id="pay" class="paylist"></div>
+    <div class="row">
+      <label data-i18n="shiftMode">Režim směn:</label>
+      <div class="chip">
+        <input type="radio" name="mode" id="mode12" value="12">
+        <label for="mode12" data-i18n="mode12">12 h (D/N/V)</label>
+      </div>
+      <div class="chip">
+        <input type="radio" name="mode" id="mode8" value="8">
+        <label for="mode8" data-i18n="mode8">8 h (R/O/N/V)</label>
+      </div>
+    </div>
 
-    <div id="gross" class="result">💼 Hrubá mzda: 0,00 Kč</div>
-    <div id="net" class="result">💵 Čistá mzda (odhad): 0,00 Kč</div>
-    <div id="meal" class="result">🍽️ Stravenky: 0,00 Kč</div>
-    <div id="cafInfo" class="result">🎁 Cafeterie (mimo čistou): 0,00 Kč</div>
-  </aside>
-</div>
+    <div class="row">
+      <label for="langSelect" data-i18n="language">Jazyk:</label>
+      <select id="langSelect">
+        <option value="cs">Čeština</option>
+        <option value="en">English</option>
+        <option value="de">Deutsch</option>
+      </select>
 
-<script src="app_v181.js?v=181"></script>
+      <label for="currencySelect" data-i18n="currency">Měna:</label>
+      <select id="currencySelect">
+        <option value="CZK">Kč</option>
+        <option value="EUR">€</option>
+        <option value="USD">$</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- STATISTIKY -->
+  <div class="card" id="card-stats">
+    <div class="h3wrap">
+      <h3 data-i18n="monthStats">Statistiky měsíce</h3>
+    </div>
+    <p class="subtle" data-i18n="rules">
+      Obědy jen všední den při denní (12h: D; 8h: R). Dovolená = nastavené hodiny/den.
+      Svátek: směna + průměr.
+    </p>
+
+    <!-- Sem patří tvoje počítané výstupy (počty směn/hodin), ponechávám prázdné kontejnery -->
+    <div id="monthStatsOutput"></div>
+  </div>
+
+  <!-- MZDA (VSTUPY) -->
+  <div class="card" id="card-wage">
+    <div class="h3wrap">
+      <h3 data-i18n="wageInputs">Mzda (vstupy)</h3>
+    </div>
+
+    <div class="row">
+      <label for="baseRate" data-i18n="baseRate">Základní hodinovka</label>
+      <input id="baseRate" type="number" inputmode="decimal" placeholder="">
+    </div>
+
+    <div class="row">
+      <label for="aftBonus" data-i18n="aftBonus">Odpolední příplatek</label>
+      <input id="aftBonus" type="number" inputmode="decimal" placeholder="">
+      <label for="nightBonus" data-i18n="nightBonus">Noční příplatek</label>
+      <input id="nightBonus" type="number" inputmode="decimal" placeholder="">
+    </div>
+
+    <div class="row">
+      <label for="weekendBonus" data-i18n="weekendBonus">Víkendový příplatek</label>
+      <input id="weekendBonus" type="number" inputmode="decimal" placeholder="">
+      <label for="holidayWorked" data-i18n="holidayWorked">Svátek (Kč/h) – odpracovaný</label>
+      <input id="holidayWorked" type="number" inputmode="decimal" placeholder="">
+    </div>
+
+    <div class="row">
+      <label for="continuousBonus" data-i18n="continuousBonus">Nepřetržitý provoz</label>
+      <input id="continuousBonus" type="number" inputmode="decimal" placeholder="">
+      <label for="directBonus" data-i18n="directBonus">Přímé prémie (%)</label>
+      <input id="directBonus" type="number" inputmode="decimal" placeholder="">
+    </div>
+
+    <div class="row">
+      <label for="cafeteria1000" data-i18n="cafeteriaBonus">Docházkový bonus (Cafeterie 1000 Kč – mimo čistou)</label>
+      <input id="cafeteria1000" type="checkbox">
+      <label for="annualMotiv" data-i18n="annualMotiv">Roční motivační (Kč)</label>
+      <input id="annualMotiv" type="number" inputmode="decimal" placeholder="">
+    </div>
+
+    <div class="row">
+      <label for="vacHoursPerDay" data-i18n="vacPerDay">Dovolená (hod/den)</label>
+      <input id="vacHoursPerDay" type="number" inputmode="decimal" placeholder="">
+    </div>
+  </div>
+
+  <!-- PRŮMĚRNÁ NÁHRADA -->
+  <div class="card" id="card-avg">
+    <div class="h3wrap">
+      <h3 data-i18n="avgHeader">Průměrná náhrada (poslední 3 měsíce)</h3>
+      <span class="info">ℹ️</span>
+      <div class="tooltip">
+        <b data-i18n="avgHelpTitle">Jak počítáme průměr</b><br>
+        <span data-i18n="avgHelpBody">
+          Zadej čisté mzdy a odpracované hodiny za poslední 3 měsíce
+          nebo ručně vyplň průměr (Kč/h). Výsledek se použije pro svátky a dovolenou.
+        </span>
+      </div>
+    </div>
+
+    <div class="row">
+      <label for="netM1" data-i18n="netM1">Čistá mzda M-1</label>
+      <input id="netM1" type="number" inputmode="decimal" placeholder="">
+      <label for="netM2" data-i18n="netM2">Čistá mzda M-2</label>
+      <input id="netM2" type="number" inputmode="decimal" placeholder="">
+    </div>
+
+    <div class="row">
+      <label for="hoursM1" data-i18n="hoursM1">Hodiny M-1</label>
+      <input id="hoursM1" type="number" inputmode="decimal" placeholder="">
+      <label for="hoursM2" data-i18n="hoursM2">Hodiny M-2</label>
+      <input id="hoursM2" type="number" inputmode="decimal" placeholder="">
+    </div>
+
+    <div class="row">
+      <label for="netM3" data-i18n="netM3">Čistá mzda M-3</label>
+      <input id="netM3" type="number" inputmode="decimal" placeholder="">
+      <label for="hoursM3" data-i18n="hoursM3">Hodiny M-3</label>
+      <input id="hoursM3" type="number" inputmode="decimal" placeholder="">
+    </div>
+
+    <div class="row">
+      <label for="manualAvg" data-i18n="manualAvg">Ručně zadaná průměrná náhrada (Kč/h)</label>
+      <input id="manualAvg" type="number" inputmode="decimal" placeholder="">
+    </div>
+
+    <div class="result">
+      <span data-i18n="avgResult">Průměrná náhrada:</span>
+      <span id="avgOut">0,00 Kč</span>
+    </div>
+  </div>
+
+  <!-- VÝSLEDKY -->
+  <div class="card" id="card-results">
+    <div class="result payline">
+      <span>🧳</span>
+      <strong data-i18n="gross">Hrubá mzda:</strong>
+      <span id="grossOut">0,00 Kč</span>
+    </div>
+
+    <div class="result payline">
+      <span>💵</span>
+      <strong data-i18n="netEst">Čistá mzda (odhad):</strong>
+      <span id="netOut">0,00 Kč</span>
+    </div>
+
+    <div class="result payline">
+      <span>🍽️</span>
+      <strong data-i18n="vouchers">Stravenky:</strong>
+      <span id="vouchersOut">0,00 Kč</span>
+    </div>
+
+    <div class="result payline">
+      <span>🎁</span>
+      <strong data-i18n="cafeteriaOut">Cafeterie (mimo čistou):</strong>
+      <span id="cafeteriaOut">0,00 Kč</span>
+    </div>
+  </div>
+</main>
 </body>
 </html>

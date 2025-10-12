@@ -1,206 +1,124 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="cs">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1a1f2b">
   <title>Směnářek</title>
-  <meta name="theme-color" content="#102a4a">
+
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="icons/icon-192.png">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="stylesheet" href="style.css">
+
   <style>
-    :root{
-      --bg:#0c1d33; --panel:#122e52; --ink:#eaf2ff; --muted:#a9c3e6; --accent:#6cc0ff;
-      --sel:#1e78d799; --good:#5bd39a; --goodtext:#9ff3cd; --field:#0b213d; --border:#1f3f66;
+    body {
+      background-color: #0f1320;
+      color: #e3e6f1;
+      font-family: "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
     }
-    body.mode8{ --accent:#b38cff; --sel:#7b3ff299; }
-    html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto}
-    *{box-sizing:border-box}
-    header{position:sticky;top:0;z-index:5;background:linear-gradient(180deg,rgba(12,29,51,.95),rgba(12,29,51,.7));backdrop-filter:blur(6px)}
-    .head{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:.7rem 1rem}
-    .logo{font-size:2rem;line-height:1}
-    h1{margin:.2rem 0 0 0;font-size:1.25rem}
-    .todayBox{width:100%;max-width:1200px;padding:.4rem 1rem 0 1rem}
-    .todayLine{color:var(--goodtext);font-weight:700}
-    .todayLine + .todayLine{margin-top:.15rem}
-    .wrap{max-width:1200px;margin:0 auto;padding:1rem}
-    .grid{display:grid;grid-template-columns:1fr;gap:.9rem}
-    @media(min-width:1100px){.grid{grid-template-columns:1.5fr 1fr}}
-    .card{background:var(--panel);border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.25);padding:1rem;position:relative}
-    /* override old position */
-.info {
-  position: absolute !important;
-  top: 10px !important;
-  right: 12px !important;
-  left: auto !important;font-size:.9rem;opacity:.92;cursor:pointer}
-    .tooltip{position:absolute;right:12px;left:auto;top:36px;max-width:380px;background:rgba(0,0,0,.86);
-      border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:.6rem .7rem;font-size:.9rem;
-      opacity:0;pointer-events:none;transform:translateY(-4px);transition:opacity .18s ease, transform .18s ease;
-      transition-delay:.45s}
-    .info:hover + .tooltip{opacity:1;pointer-events:auto;transform:translateY(0)}
-    .tooltip b{color:#bfe1ff}
-    #card-calendar{position:relative;overflow:hidden}
-    #bg-layer{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.34;filter:contrast(1.08) brightness(.95);pointer-events:none}
-    #card-calendar > *:not(#bg-layer){position:relative}
-    .calendar{width:100%;border-collapse:collapse}
-    .calendar th,.calendar td{border:1px solid rgba(255,255,255,.08);padding:.35rem;vertical-align:top}
-    .calendar th{color:var(--muted);font-weight:600;text-align:center;background:rgba(14,38,70,.45)}
-    .calendar td{height:92px;position:relative;background:rgba(15,39,72,.26);transition:background .15s ease}
-    .calendar td.selected{background:var(--sel)!important;box-shadow:inset 0 0 0 2px #75c7ff99}
-    .calendar td.today:not(.selected){box-shadow:inset 0 0 0 2px rgba(108,192,255,.75)}
-    .daynum{position:absolute;top:.35rem;right:.35rem;color:var(--muted);font-size:.85rem;text-shadow:0 1px 1px rgba(0,0,0,.35)}
-    .badge{display:inline-block;margin-top:1.2rem;padding:.2rem .5rem;border-radius:8px;font-size:.85rem;background:rgba(0,0,0,.18)}
-    .D{background:linear-gradient(180deg,rgba(108,192,255,.12),rgba(108,192,255,.10))}
-    .N{background:linear-gradient(180deg,rgba(255,188,104,.12),rgba(255,188,104,.10))}
-    .V{background:linear-gradient(180deg,rgba(119,214,139,.14),rgba(119,214,139,.10))}
-    .R{background:linear-gradient(180deg,rgba(108,192,255,.12),rgba(108,192,255,.10))}
-    .O{background:linear-gradient(180deg,rgba(255,188,104,.12),rgba(255,188,104,.10))}
-    .row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
-    .chip{padding:.3rem .7rem;border:1px solid rgba(255,255,255,.12);border-radius:99px;background:transparent;color:var(--ink);cursor:pointer}
-    label{display:block;margin:.45rem 0 .25rem}
-    input[type="number"]{width:100%;padding:.6rem .7rem;border-radius:12px;border:1px solid var(--border);background:var(--field);color:var(--ink)}
-    input[type="number"]:focus{outline:none;border-color:#3e78b9;box-shadow:0 0 0 2px rgba(110,192,255,.25)}
-    .paylist{margin-top:.5rem}
-    .payline{display:flex;justify-content:space-between;padding:.35rem 0;border-bottom:1px solid rgba(255,255,255,.08)}
-    .payline:last-child{border-bottom:none}
-    .result{margin-top:.6rem;padding:.7rem .9rem;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(91,211,154,.12);color:#9ff3cd;font-weight:700}
-    .subtle{color:var(--muted);margin-top:.2rem}
-    hr{border:none;height:1px;background:rgba(255,255,255,.1);margin:1rem 0}
-    .h3wrap{display:flex;align-items:center;gap:.4rem;position:relative}
-    .h3wrap .info{position:static;margin-left:auto !important}
-    .h3wrap .tooltip{right:0;left:auto;top:2.1rem}
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #182037;
+      color: #fff;
+      padding: 10px 16px;
+      box-shadow: 0 2px 5px rgba(0,0,0,.4);
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+    h1 { margin: 0; font-size: 1.4em; color:#7ab8ff; }
+    main.wrap { padding: 10px; max-width: 900px; margin: auto; }
+
+    .card {
+      background: #1d263d;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 18px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 8px rgba(0,0,0,.5);
+    }
+
+    .h3wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .info {
+      cursor: pointer;
+      font-size: 1.1em;
+      margin-left: 8px;
+    }
+    .tooltip {
+      display:none;
+      position:absolute;
+      right:12px;
+      top:30px;
+      background:#2c3552;
+      color:#fff;
+      border-radius:6px;
+      padding:6px 10px;
+      width:260px;
+      box-shadow:0 2px 8px rgba(0,0,0,.6);
+      z-index:3;
+    }
+    .info:hover + .tooltip,
+    .tooltip:hover { display:block; }
+
+    table.calendar {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+      position:relative;
+      z-index:1;
+    }
+    table.calendar td {
+      padding: 6px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    table.calendar td.active {
+      background: #3a82f6;
+      color: #fff;
+    }
+
+    .row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; align-items: center; }
+    .row label { min-width: 130px; font-size: .9em; }
+    .row input, .row select {
+      background: #11182b; border:1px solid #2a375b;
+      color:#e3e6f1; border-radius:6px; padding:4px 6px;
+    }
+
+    .result { display:flex; justify-content:space-between; margin:4px 0; }
+    .payline strong { color:#7ab8ff; }
+    .todayBox { text-align:center; font-size:.95em; }
   </style>
 </head>
 <body>
-  <!-- ⚙️ Tlačítko Nastavení -->
-<button id="settingsButton" class="settings-btn">⚙️ Nastavení</button>
 
-<!-- 🪟 Panel Nastavení -->
-<div id="settingsPanel" class="settings-panel" style="display:none;">
-  <h2>Nastavení</h2>
-
-  <section>
-    <h3>🌍 Obecné</h3>
-    <label>Jazyk:
-      <select id="language">
-        <option value="cz">Čeština 🇨🇿</option>
-        <option value="de">Deutsch 🇩🇪</option>
-        <option value="en">English 🇬🇧</option>
-      </select>
-    </label>
-    <label>Měna:
-      <select id="currency">
-        <option value="czk">Kč</option>
-        <option value="eur">€</option>
-        <option value="usd">$</option>
-      </select>
-    </label>
-    <label>Daňová lokalita:
-      <select id="taxLocale">
-        <option value="cz">Česko 🇨🇿</option>
-        <option value="de">Německo 🇩🇪</option>
-        <option value="uk">Anglie 🇬🇧</option>
-      </select>
-    </label>
-  </section>
-
-  <section>
-    <h3>⏱️ Směny</h3>
-    <label>Délka směny (h): <input type="number" id="shiftLength" value="11.25" step="0.25"></label><br>
-    <label>Stravenky za směnu: <input type="number" id="mealTicketsPerShift" value="1" min="0"></label>
-  </section>
-
-  <section>
-    <h3>🍱 Stravenky & Obědy</h3>
-    <label>Cena 1 stravenky: <input type="number" id="ticketValue" value="110"></label><br>
-    <label>Odebrané obědy: <input type="number" id="mealsTaken" value="0"></label><br>
-    <label>Neodebrané obědy: <input type="number" id="mealsNotTaken" value="0"></label>
-  </section>
-
-  <section>
-    <h3>💰 Bonusy</h3>
-    <label>Prémie z fondu vedoucího: <input type="number" id="managerBonus" value="0"></label><br>
-    <label>Roční motivační (červen/listopad): <input type="number" id="annualBonus" value="0"></label>
-  </section>
-
-  <button id="saveSettings" class="save-btn">💾 Uložit nastavení</button>
-  <button id="closeSettings" class="close-btn">✖ Zavřít</button>
-</div>
-
-<style>
-  .settings-btn {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 10px 15px;
-    font-size: 16px;
-    cursor: pointer;
-    z-index: 9998;
-  }
-  .settings-panel {
-    position: fixed;
-    top: 10%;
-    right: 5%;
-    width: 320px;
-    background: rgba(25, 25, 25, 0.95);
-    color: white;
-    border-radius: 15px;
-    padding: 20px;
-    z-index: 9999;
-    box-shadow: 0 0 15px rgba(0,0,0,0.4);
-    overflow-y: auto;
-    max-height: 80vh;
-  }
-  .settings-panel h3 {
-    margin-top: 15px;
-    color: #ffcc00;
-  }
-  .save-btn, .close-btn {
-    background-color: #28a745;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 8px 12px;
-    margin: 10px 5px 0 0;
-    cursor: pointer;
-  }
-  .close-btn {
-    background-color: #dc3545;
-  }
-</style>
 <header>
-  <div class="head">
-    <div class="logo">
-      <h1 data-i18n="title">Směnářek</h1>
-    </div>
-
-    <div class="todayBox">
-      <div class="todayLine">
-        <strong data-i18n="today">Dnes:</strong>
-        <span id="todayShift"></span>
-      </div>
-      <div class="todayLine">
-        <strong data-i18n="nameday">Svátek:</strong>
-        <span id="todayName"></span>
-      </div>
-    </div>
-
-    <div class="buttons">
-      <button id="goToday" data-i18n="btnToday">Dnes</button>
-      <button id="clearDay" data-i18n="btnClear">Vymazat den</button>
-    </div>
+  <div class="logo">
+    <h1 data-i18n="title">Směnářek</h1>
+  </div>
+  <div class="todayBox">
+    <div><strong data-i18n="today">Dnes:</strong> <span id="todayShift"></span></div>
+    <div><strong data-i18n="nameday">Svátek:</strong> <span id="todayName"></span></div>
   </div>
 </header>
 
 <main class="wrap">
+
   <!-- KALENDÁŘ -->
   <div class="card" id="card-calendar">
-    <div id="bg-layer"></div>
+    <div id="bg-layer" style="position:absolute;inset:0;background-size:cover;background-position:center;opacity:.30;pointer-events:none;z-index:0;"></div>
 
-    <div class="h3wrap">
+    <div class="h3wrap" style="position:relative;z-index:1;">
       <h3 data-i18n="calendar">Kalendář</h3>
       <span class="info" aria-label="info">ℹ️</span>
       <div class="tooltip">
@@ -212,7 +130,7 @@
       </div>
     </div>
 
-    <div class="row">
+    <div class="row" style="position:relative;z-index:1;">
       <button id="prevMonth" aria-label="Prev">←</button>
       <div id="monthLabel"></div>
       <button id="nextMonth" aria-label="Next">→</button>
@@ -220,7 +138,7 @@
       <button id="clearDayTop" data-i18n="btnClear">Vymazat den</button>
     </div>
 
-    <table class="calendar" id="calendar"></table>
+    <table class="calendar" id="calendar" style="position:relative;z-index:1;"></table>
   </div>
 
   <!-- NASTAVENÍ -->
@@ -238,14 +156,8 @@
 
     <div class="row">
       <label data-i18n="shiftMode">Režim směn:</label>
-      <div class="chip">
-        <input type="radio" name="mode" id="mode12" value="12">
-        <label for="mode12" data-i18n="mode12">12 h (D/N/V)</label>
-      </div>
-      <div class="chip">
-        <input type="radio" name="mode" id="mode8" value="8">
-        <label for="mode8" data-i18n="mode8">8 h (R/O/N/V)</label>
-      </div>
+      <div class="chip"><input type="radio" name="mode" id="mode12" value="12"><label for="mode12" data-i18n="mode12">12 h (D/N/V)</label></div>
+      <div class="chip"><input type="radio" name="mode" id="mode8" value="8"><label for="mode8" data-i18n="mode8">8 h (R/O/N/V)</label></div>
     </div>
 
     <div class="row">
@@ -255,7 +167,6 @@
         <option value="en">English</option>
         <option value="de">Deutsch</option>
       </select>
-
       <label for="currencySelect" data-i18n="currency">Měna:</label>
       <select id="currencySelect">
         <option value="CZK">Kč</option>
@@ -271,11 +182,8 @@
       <h3 data-i18n="monthStats">Statistiky měsíce</h3>
     </div>
     <p class="subtle" data-i18n="rules">
-      Obědy jen všední den při denní (12h: D; 8h: R). Dovolená = nastavené hodiny/den.
-      Svátek: směna + průměr.
+      Obědy jen všední den při denní (12h: D; 8h: R). Dovolená = nastavené hodiny/den. Svátek: směna + průměr.
     </p>
-
-    <!-- Sem patří tvoje počítané výstupy (počty směn/hodin), ponechávám prázdné kontejnery -->
     <div id="monthStatsOutput"></div>
   </div>
 
@@ -287,40 +195,35 @@
 
     <div class="row">
       <label for="baseRate" data-i18n="baseRate">Základní hodinovka</label>
-      <input id="baseRate" type="number" inputmode="decimal" placeholder="">
+      <input id="baseRate" type="number" inputmode="decimal">
     </div>
-
     <div class="row">
       <label for="aftBonus" data-i18n="aftBonus">Odpolední příplatek</label>
-      <input id="aftBonus" type="number" inputmode="decimal" placeholder="">
+      <input id="aftBonus" type="number" inputmode="decimal">
       <label for="nightBonus" data-i18n="nightBonus">Noční příplatek</label>
-      <input id="nightBonus" type="number" inputmode="decimal" placeholder="">
+      <input id="nightBonus" type="number" inputmode="decimal">
     </div>
-
     <div class="row">
       <label for="weekendBonus" data-i18n="weekendBonus">Víkendový příplatek</label>
-      <input id="weekendBonus" type="number" inputmode="decimal" placeholder="">
+      <input id="weekendBonus" type="number" inputmode="decimal">
       <label for="holidayWorked" data-i18n="holidayWorked">Svátek (Kč/h) – odpracovaný</label>
-      <input id="holidayWorked" type="number" inputmode="decimal" placeholder="">
+      <input id="holidayWorked" type="number" inputmode="decimal">
     </div>
-
     <div class="row">
       <label for="continuousBonus" data-i18n="continuousBonus">Nepřetržitý provoz</label>
-      <input id="continuousBonus" type="number" inputmode="decimal" placeholder="">
+      <input id="continuousBonus" type="number" inputmode="decimal">
       <label for="directBonus" data-i18n="directBonus">Přímé prémie (%)</label>
-      <input id="directBonus" type="number" inputmode="decimal" placeholder="">
+      <input id="directBonus" type="number" inputmode="decimal">
     </div>
-
     <div class="row">
       <label for="cafeteria1000" data-i18n="cafeteriaBonus">Docházkový bonus (Cafeterie 1000 Kč – mimo čistou)</label>
       <input id="cafeteria1000" type="checkbox">
       <label for="annualMotiv" data-i18n="annualMotiv">Roční motivační (Kč)</label>
-      <input id="annualMotiv" type="number" inputmode="decimal" placeholder="">
+      <input id="annualMotiv" type="number" inputmode="decimal">
     </div>
-
     <div class="row">
       <label for="vacHoursPerDay" data-i18n="vacPerDay">Dovolená (hod/den)</label>
-      <input id="vacHoursPerDay" type="number" inputmode="decimal" placeholder="">
+      <input id="vacHoursPerDay" type="number" inputmode="decimal">
     </div>
   </div>
 
@@ -337,65 +240,20 @@
         </span>
       </div>
     </div>
-
-    <div class="row">
-      <label for="netM1" data-i18n="netM1">Čistá mzda M-1</label>
-      <input id="netM1" type="number" inputmode="decimal" placeholder="">
-      <label for="netM2" data-i18n="netM2">Čistá mzda M-2</label>
-      <input id="netM2" type="number" inputmode="decimal" placeholder="">
-    </div>
-
-    <div class="row">
-      <label for="hoursM1" data-i18n="hoursM1">Hodiny M-1</label>
-      <input id="hoursM1" type="number" inputmode="decimal" placeholder="">
-      <label for="hoursM2" data-i18n="hoursM2">Hodiny M-2</label>
-      <input id="hoursM2" type="number" inputmode="decimal" placeholder="">
-    </div>
-
-    <div class="row">
-      <label for="netM3" data-i18n="netM3">Čistá mzda M-3</label>
-      <input id="netM3" type="number" inputmode="decimal" placeholder="">
-      <label for="hoursM3" data-i18n="hoursM3">Hodiny M-3</label>
-      <input id="hoursM3" type="number" inputmode="decimal" placeholder="">
-    </div>
-
-    <div class="row">
-      <label for="manualAvg" data-i18n="manualAvg">Ručně zadaná průměrná náhrada (Kč/h)</label>
-      <input id="manualAvg" type="number" inputmode="decimal" placeholder="">
-    </div>
-
-    <div class="result">
-      <span data-i18n="avgResult">Průměrná náhrada:</span>
-      <span id="avgOut">0,00 Kč</span>
-    </div>
+    <div id="avgInputs"></div>
+    <div class="result"><span data-i18n="avgResult">Průměrná náhrada:</span><span id="avgOut">0,00 Kč</span></div>
   </div>
 
   <!-- VÝSLEDKY -->
   <div class="card" id="card-results">
-    <div class="result payline">
-      <span>🧳</span>
-      <strong data-i18n="gross">Hrubá mzda:</strong>
-      <span id="grossOut">0,00 Kč</span>
-    </div>
-
-    <div class="result payline">
-      <span>💵</span>
-      <strong data-i18n="netEst">Čistá mzda (odhad):</strong>
-      <span id="netOut">0,00 Kč</span>
-    </div>
-
-    <div class="result payline">
-      <span>🍽️</span>
-      <strong data-i18n="vouchers">Stravenky:</strong>
-      <span id="vouchersOut">0,00 Kč</span>
-    </div>
-
-    <div class="result payline">
-      <span>🎁</span>
-      <strong data-i18n="cafeteriaOut">Cafeterie (mimo čistou):</strong>
-      <span id="cafeteriaOut">0,00 Kč</span>
-    </div>
+    <div class="result payline"><strong data-i18n="gross">Hrubá mzda:</strong><span id="grossOut">0,00 Kč</span></div>
+    <div class="result payline"><strong data-i18n="netEst">Čistá mzda (odhad):</strong><span id="netOut">0,00 Kč</span></div>
+    <div class="result payline"><strong data-i18n="vouchers">Stravenky:</strong><span id="vouchersOut">0,00 Kč</span></div>
+    <div class="result payline"><strong data-i18n="cafeteriaOut">Cafeterie (mimo čistou):</strong><span id="cafeteriaOut">0,00 Kč</span></div>
   </div>
+
 </main>
+
+<script src="app_v181.js?v=194" defer></script>
 </body>
 </html>

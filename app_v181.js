@@ -295,3 +295,74 @@ function renderCalendar(){
 }
 
 renderCalendar();
+// === ⚙️ Panel Nastavení ===
+const settingsButton = document.getElementById('settingsButton');
+const settingsPanel = document.getElementById('settingsPanel');
+const saveSettingsBtn = document.getElementById('saveSettings');
+const closeSettingsBtn = document.getElementById('closeSettings');
+
+settingsButton.addEventListener('click', () => {
+  settingsPanel.style.display = 'block';
+});
+closeSettingsBtn.addEventListener('click', () => {
+  settingsPanel.style.display = 'none';
+});
+
+// Uložení do localStorage
+saveSettingsBtn.addEventListener('click', () => {
+  const settings = {
+    language: document.getElementById('language').value,
+    currency: document.getElementById('currency').value,
+    taxLocale: document.getElementById('taxLocale').value,
+    shiftLength: parseFloat(document.getElementById('shiftLength').value),
+    mealTicketsPerShift: parseInt(document.getElementById('mealTicketsPerShift').value),
+    ticketValue: parseFloat(document.getElementById('ticketValue').value),
+    mealsTaken: parseInt(document.getElementById('mealsTaken').value),
+    mealsNotTaken: parseInt(document.getElementById('mealsNotTaken').value),
+    managerBonus: parseFloat(document.getElementById('managerBonus').value),
+    annualBonus: parseFloat(document.getElementById('annualBonus').value)
+  };
+  localStorage.setItem('smenarekSettings', JSON.stringify(settings));
+  applySettings(settings);
+  settingsPanel.style.display = 'none';
+  alert('✅ Nastavení uloženo');
+});
+
+// Načtení při startu
+window.addEventListener('load', () => {
+  const saved = JSON.parse(localStorage.getItem('smenarekSettings'));
+  if (saved) applySettings(saved);
+});
+
+function applySettings(s) {
+  if (!s) return;
+  // Daňové výpočty
+  const taxes = {
+    cz: { soc: 6.5, zdr: 4.5, tax: 15, mult: 1.34 },
+    de: { soc: 9.3, zdr: 7.3, tax: 18, mult: 1.0 },
+    uk: { soc: 8, zdr: 0, tax: 20, mult: 1.0 }
+  };
+  const t = taxes[s.taxLocale];
+  window.activeTaxes = t;
+
+  // Měna
+  window.activeCurrency = s.currency;
+  window.shiftLength = s.shiftLength;
+  window.ticketValue = s.ticketValue;
+  window.mealTicketsPerShift = s.mealTicketsPerShift;
+  window.managerBonus = s.managerBonus;
+  window.annualBonus = s.annualBonus;
+
+  // Přepočet čisté mzdy (zjednodušený)
+  if (typeof recalculateWage === 'function') recalculateWage();
+}
+
+// Příklad – můžeš upravit podle své kalkulace
+function recalculateWage() {
+  const base = window.baseWage || 0;
+  const t = window.activeTaxes || { soc:6.5,zdr:4.5,tax:15,mult:1.34 };
+  const superGross = base * t.mult;
+  const deductions = (superGross * (t.tax/100)) + (base*(t.soc/100)) + (base*(t.zdr/100));
+  const net = base - deductions;
+  console.log("Čistá mzda:", net.toFixed(2), window.activeCurrency || "Kč");
+}

@@ -122,7 +122,56 @@
       <button class="chip" id="mode8">8 h (R/O/N/V)</button>
     </div>
   </section>
+<!-- Toggle tlačítko Nastavení -->
+<div class="row" style="margin:.6rem 0 0;">
+  <button id="toggleSettings" class="chip">⚙️ <span data-i18n="settings">Nastavení</span></button>
+</div>
 
+<!-- Panel Nastavení (implicitně schovaný) -->
+<section id="settingsPanel" class="card hidden">
+  <div class="h3wrap">
+    <h3 data-i18n="settings">Nastavení</h3>
+    <div class="info">
+      <b>i</b>
+      <div class="tooltip">
+        <div data-i18n="settings_help_title"><b>Jak funguje nastavení</b></div>
+        <div data-i18n="settings_help_text">
+          Přepni režim směn, jazyk a měnu. Volba se uloží do zařízení a použije se při příštím otevření.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top:.6rem;align-items:center;gap:.6rem">
+    <span class="chip" data-i18n="shift_mode">Režim směn:</span>
+
+    <label class="chip" style="display:flex;align-items:center;gap:.45rem">
+      <input type="radio" name="shiftMode" id="mode12" value="12">
+      <span data-i18n="mode12">12 h (D/N/V)</span>
+    </label>
+
+    <label class="chip" style="display:flex;align-items:center;gap:.45rem">
+      <input type="radio" name="shiftMode" id="mode8" value="8">
+      <span data-i18n="mode8">8 h (R/O/N/V)</span>
+    </label>
+  </div>
+
+  <div class="row" style="margin-top:.6rem;gap:.6rem;flex-wrap:wrap">
+    <label class="chip" for="langSelect" data-i18n="language">Jazyk:</label>
+    <select id="langSelect" class="chip">
+      <option value="cs">Čeština</option>
+      <option value="en">English</option>
+      <option value="de">Deutsch</option>
+    </select>
+
+    <label class="chip" for="currencySelect" data-i18n="currency">Měna:</label>
+    <select id="currencySelect" class="chip">
+      <option value="CZK">Kč</option>
+      <option value="EUR">€</option>
+      <option value="USD">$</option>
+    </select>
+  </div>
+</section>
   <!-- NASTAVENÍ (nové) -->
   <section class="card" id="card-settings">
     <div class="info" title="Nápověda">ℹ️</div>

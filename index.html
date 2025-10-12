@@ -8,30 +8,33 @@
 <link rel="icon" href="icons/icon-192.png">
 <meta name="theme-color" content="#0b1e38">
 <style>
-:root{--bg:#0b1e38;--panel:#112a4f;--ink:#eef3ff;--muted:#a9c3e6;--accent:#4ea3ff;--green:#1c5e43;--greenText:#b7ffd9;--border:rgba(255,255,255,.14);--chip:rgba(255,255,255,.08)}
+:root{--bg:#0b1e38;--panel:rgba(17,42,79,.82);--ink:#eef3ff;--muted:#a9c3e6;--accent:#4ea3ff;--green1:#1b6a4b;--green2:#15523e;--greenText:#c9ffe7;--border:rgba(255,255,255,.14);--chip:rgba(255,255,255,.08)}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif}
+*{box-sizing:border-box}
 .wrap{max-width:1100px;margin:0 auto;padding:10px}
 header{padding:24px 10px 10px;position:relative;text-align:center}
-.title{font-size:32px;font-weight:800;margin:6px 0 10px 0;color:#fff}
-#btnSettings{position:absolute;right:10px;top:10px;border:1px solid var(--border);background:var(--chip);color:#fff;border-radius:12px;padding:8px 12px;cursor:pointer}
-.card{background:var(--panel);border-radius:16px;box-shadow:0 8px 26px rgba(0,0,0,.28);margin:10px 0;overflow:hidden;position:relative}
+.title{font-size:32px;font-weight:800;margin:6px 0 10px 0;color:#fff;letter-spacing:.3px}
+#btnSettings{position:absolute;right:10px;top:10px;border:1px solid var(--border);background:var(--chip);color:#fff;border-radius:12px;padding:8px 12px;cursor:pointer;transition:transform .06s ease, background .15s ease}
+#btnSettings:hover{transform:translateY(-1px);background:rgba(255,255,255,.12)}
+.card{background:var(--panel);backdrop-filter: blur(10px);border:1px solid rgba(255,255,255,.08);border-radius:16px;box-shadow:0 8px 26px rgba(0,0,0,.28);margin:10px 0;overflow:hidden;position:relative}
 .card .head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border)}
-.head h3{margin:0;font-size:1.1rem}
+.head h3{margin:0;font-size:1.1rem;letter-spacing:.2px}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px 14px}
-.chip{padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:var(--chip)}
+.chip{padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:var(--chip);transition:transform .06s ease, background .15s ease}
+.chip:hover{transform:translateY(-1px);background:rgba(255,255,255,.12)}
 table.calendar{width:100%;border-collapse:collapse}
-.calendar th{color:var(--muted);background:rgba(255,255,255,.06);padding:6px}
-.calendar td{height:90px;border:1px solid rgba(255,255,255,.07);background:rgba(0,0,0,.10);position:relative;vertical-align:top}
+.calendar th{color:var(--muted);background:rgba(255,255,255,.06);padding:6px;backdrop-filter: blur(6px)}
+.calendar td{height:90px;border:1px solid rgba(255,255,255,.06);background:rgba(0,0,0,.06);position:relative;vertical-align:top}
 .calendar td.today{box-shadow:inset 0 0 0 2px var(--accent)}
 .calendar td.selected{background:rgba(78,163,255,.25)}
 .daynum{position:absolute;top:6px;right:6px;color:var(--muted);font-size:.9rem}
 .badge{display:inline-block;margin-top:18px;padding:2px 6px;border-radius:8px;background:rgba(0,0,0,.22);font-weight:700}
 .holiday{outline:2px solid rgba(111,227,160,.85);background:linear-gradient(180deg,rgba(111,227,160,.16),rgba(111,227,160,.08))}
-#bg-layer{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.42;filter:contrast(.95) brightness(.9)}
+#bg-layer{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.58;filter:contrast(.95) brightness(.9)}
 #card-calendar > *:not(#bg-layer){position:relative}
 .overview{padding:10px 14px;border-top:1px dashed var(--border)}
-.results{background:var(--green);color:var(--greenText);margin:10px;border-radius:14px;padding:10px 12px}
-.results .line{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.12)}
+.results{background:linear-gradient(180deg, var(--green1), var(--green2));color:var(--greenText);margin:10px;border-radius:14px;padding:10px 12px}
+.results .line{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed rgba(255,255,255,.18)}
 .results .line:last-child{border-bottom:none}
 .yearsum{padding:12px 14px;color:var(--muted)}
 .sign{padding:18px 10px;text-align:center;color:#fff}
@@ -48,8 +51,9 @@ input[type=number],select{width:100%;background:#0c2242;border:1px solid var(--b
 .grid2{display:grid;grid-template-columns:1fr;gap:10px}
 @media(min-width:640px){ .grid2{grid-template-columns:1fr 1fr} }
 .actions{display:flex;gap:10px;justify-content:flex-end;padding:12px 14px}
-.btn{border:1px solid var(--border);background:var(--chip);color:#fff;border-radius:10px;padding:8px 12px;cursor:pointer}
+.btn{border:1px solid var(--border);background:var(--chip);color:#fff;border-radius:10px;padding:8px 12px;cursor:pointer;transition:transform .06s ease, background .15s ease}
 .btn.primary{background:#2b8cff;border-color:#2b8cff}
+.btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.12)}
 </style>
 </head>
 <body>
@@ -128,6 +132,7 @@ input[type=number],select{width:100%;background:#0c2242;border:1px solid var(--b
         <div><label>Nepřetržitý (Kč/h)</label><input id="st_b_cont" type="number" step=".01"></div>
         <div><label>Prémie z fondu vedoucího (Kč)</label><input id="st_bonus_mgr" type="number" step="1"></div>
         <div><label>Roční motivační (Kč, auto 6 &amp; 11)</label><input id="st_bonus_year" type="number" step="1"></div>
+        <div><label>Přímé prémie (%)</label><input id="st_bonus_pct" type="number" step="0.01" value="10"></div>
         <div style="display:flex;align-items:center;gap:8px"><input id="st_caf" type="checkbox"><label for="st_caf">Cafeterie (mám nárok) +1000 Kč (mimo daň)</label></div>
       </div>
     </div>
@@ -152,6 +157,6 @@ input[type=number],select{width:100%;background:#0c2242;border:1px solid var(--b
   </div>
 </div>
 
-<script src="app.js?v=2.0" defer></script>
+<script src="app.js?v=2.1" defer></script>
 </body>
 </html>

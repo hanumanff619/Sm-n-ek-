@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smenarek20-final-2';
+const CACHE_NAME = 'smenarek21-cache-1';
 const ASSETS = [
   './',
   './index.html',

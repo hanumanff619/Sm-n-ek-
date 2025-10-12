@@ -71,6 +71,106 @@
   </style>
 </head>
 <body>
+  <!-- ⚙️ Tlačítko Nastavení -->
+<button id="settingsButton" class="settings-btn">⚙️ Nastavení</button>
+
+<!-- 🪟 Panel Nastavení -->
+<div id="settingsPanel" class="settings-panel" style="display:none;">
+  <h2>Nastavení</h2>
+
+  <section>
+    <h3>🌍 Obecné</h3>
+    <label>Jazyk:
+      <select id="language">
+        <option value="cz">Čeština 🇨🇿</option>
+        <option value="de">Deutsch 🇩🇪</option>
+        <option value="en">English 🇬🇧</option>
+      </select>
+    </label>
+    <label>Měna:
+      <select id="currency">
+        <option value="czk">Kč</option>
+        <option value="eur">€</option>
+        <option value="usd">$</option>
+      </select>
+    </label>
+    <label>Daňová lokalita:
+      <select id="taxLocale">
+        <option value="cz">Česko 🇨🇿</option>
+        <option value="de">Německo 🇩🇪</option>
+        <option value="uk">Anglie 🇬🇧</option>
+      </select>
+    </label>
+  </section>
+
+  <section>
+    <h3>⏱️ Směny</h3>
+    <label>Délka směny (h): <input type="number" id="shiftLength" value="11.25" step="0.25"></label><br>
+    <label>Stravenky za směnu: <input type="number" id="mealTicketsPerShift" value="1" min="0"></label>
+  </section>
+
+  <section>
+    <h3>🍱 Stravenky & Obědy</h3>
+    <label>Cena 1 stravenky: <input type="number" id="ticketValue" value="110"></label><br>
+    <label>Odebrané obědy: <input type="number" id="mealsTaken" value="0"></label><br>
+    <label>Neodebrané obědy: <input type="number" id="mealsNotTaken" value="0"></label>
+  </section>
+
+  <section>
+    <h3>💰 Bonusy</h3>
+    <label>Prémie z fondu vedoucího: <input type="number" id="managerBonus" value="0"></label><br>
+    <label>Roční motivační (červen/listopad): <input type="number" id="annualBonus" value="0"></label>
+  </section>
+
+  <button id="saveSettings" class="save-btn">💾 Uložit nastavení</button>
+  <button id="closeSettings" class="close-btn">✖ Zavřít</button>
+</div>
+
+<style>
+  .settings-btn {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+    z-index: 9998;
+  }
+  .settings-panel {
+    position: fixed;
+    top: 10%;
+    right: 5%;
+    width: 320px;
+    background: rgba(25, 25, 25, 0.95);
+    color: white;
+    border-radius: 15px;
+    padding: 20px;
+    z-index: 9999;
+    box-shadow: 0 0 15px rgba(0,0,0,0.4);
+    overflow-y: auto;
+    max-height: 80vh;
+  }
+  .settings-panel h3 {
+    margin-top: 15px;
+    color: #ffcc00;
+  }
+  .save-btn, .close-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 12px;
+    margin: 10px 5px 0 0;
+    cursor: pointer;
+  }
+  .close-btn {
+    background-color: #dc3545;
+  }
+</style>
 <header>
   <div class="head">
     <div class="logo">📆</div>

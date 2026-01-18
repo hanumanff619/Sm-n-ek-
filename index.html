@@ -62,17 +62,16 @@
     .h3wrap{display:flex;align-items:center;gap:.4rem;position:relative}
     .h3wrap .info{position:static;margin-left:auto !important}
     .h3wrap .tooltip{right:0;left:auto;top:2.1rem}
-    /* podpis barvy */
-    .sig {
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:.4rem;
-  opacity:.9;
-  font-size:1.05rem;
-}
-.sig .me {color:#66b3ff;font-weight:700;}
-.sig .ai {color:#ff7ac8;font-weight:700;}
+    .sig{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:.4rem;
+      opacity:.9;
+      font-size:1.05rem;
+    }
+    .sig .me{color:#66b3ff;font-weight:700;}
+    .sig .ai{color:#ff7ac8;font-weight:700;}
   </style>
 </head>
 <body>
@@ -90,8 +89,12 @@
 <div class="wrap grid">
   <section class="card" id="card-calendar">
     <div class="info" title="Nápověda">ℹ️</div>
-    <div class="tooltip">Klepni na den pro cyklus směny (12h: D→N→V→prázdno / 8h: R→O→N→V→prázdno).<br>
-      Státní svátky se označí 🎌, dnešek je orámovaný. Pozadí reaguje na 8h/12h režim.</div>
+    <div class="tooltip">
+      Klepni na den pro cyklus směny
+      (12h: <b>D→N→V→prázdno</b> / 8h: <b>R→V→prázdno</b>).<br>
+      <b>8h Ranní:</b> Po–Pá <b>05:25–13:59</b>, So/Ne <b>05:00–13:15</b> (noční příplatek do 06:00).<br>
+      Státní svátky se označí 🎌, dnešek je orámovaný. Pozadí reaguje na 8h/12h režim.
+    </div>
 
     <div id="bg-layer"></div>
     <div class="row" style="justify-content:space-between;align-items:center">
@@ -105,33 +108,46 @@
         <button class="chip" id="clearDay">Vymazat den</button>
       </div>
     </div>
+
     <table class="calendar" id="cal"></table>
+
     <div class="row" style="margin-top:.6rem;justify-content:flex-start;align-items:center">
       <span class="chip">Režim směn:</span>
       <button class="chip" id="mode12">12 h (D/N/V)</button>
-      <button class="chip" id="mode8">8 h (R/O/N/V)</button>
+      <button class="chip" id="mode8">8 h (R/V)</button>
     </div>
   </section>
 
   <aside class="card" id="card-stats">
     <div class="info" title="Nápověda">ℹ️</div>
-    <div class="tooltip">Zadej sazby. 12h směna má 12.25 h (odpracované), náhrady (svátek/dovolená) 11.25 h/den. 8h režim = 8.00 h.</div>
+    <div class="tooltip">
+      Zadej sazby. 12h směna má 11.25 h (odpracované), náhrady (svátek/dovolená) 11.25 h/den.
+      8h režim = 8.00 h.<br>
+      <b>8h Ranní:</b> Po–Pá noční 35 min, So/Ne noční 60 min.<br>
+      <b>Sobota:</b> +500 Kč za každou sobotu se směnou R.
+    </div>
 
     <h3 style="margin-top:0">Statistiky měsíce</h3>
     <div id="stats" class="note"></div>
     <div id="substats" class="note" style="display:none"></div>
-    <p class="note">Obědy jen všední den při denní (12h: D; 8h: R). Dovolená: V = 11.25 h (12h) / 8.00 h (8h). Svátek: průměr.</p>
+
+    <p class="note">
+      Obědy jen všední den při denní (12h: D; 8h: R).<br>
+      Dovolená: V = 11.25 h (12h) / 8.00 h (8h). Svátek: průměr.
+    </p>
     <hr>
 
     <div class="h3wrap">
       <h3 style="margin:0">Mzda (vstupy)</h3>
       <div class="info" title="Nápověda">ℹ️</div>
-      <div class="tooltip">Základ + příplatky. Dole vyplň „Průměrná náhrada“ (nebo ručně Kč/h). Používá se pro svátky a dovolenou.</div>
+      <div class="tooltip">
+        Základ + příplatky. Dole vyplň „Průměrná náhrada“ (nebo ručně Kč/h).
+        Používá se pro svátky a dovolenou.
+      </div>
     </div>
 
     <label>Základní hodinovka</label><input id="rate_base" type="number" step="0.01">
 
-    <!-- ✨ ZÁKLAD PRO AKTUÁLNÍ MĚSÍC -->
     <div class="row" style="width:100%">
       <div style="flex:1;min-width:140px">
         <label>Základní hodinovka – tento měsíc (Kč/h)</label>
@@ -160,17 +176,21 @@
       <div style="flex:1;min-width:140px"><label>Roční motivační (Kč) — počítá se jen v 6/11</label><input id="annual_bonus" type="number" step="1" value="0"></div>
     </div>
 
-    <!-- ✨ MĚSÍČNÍ FOND VEDOUCÍHO -->
     <div class="row" style="width:100%">
       <div style="flex:1;min-width:140px"><label>Fond vedoucího – tento měsíc (Kč)</label><input id="fund_bonus_month" type="number" step="1" value=""></div>
     </div>
 
     <hr>
+
     <div class="h3wrap">
       <h3 style="margin:0">Průměrná náhrada (poslední 3 měsíce)</h3>
       <div class="info" title="Nápověda">ℹ️</div>
-      <div class="tooltip">Zadej čisté mzdy a hodiny za poslední 3 měsíce. Průměr = (součet čistých)/(součet hodin). Ruční hodnota má přednost.</div>
+      <div class="tooltip">
+        Zadej čisté mzdy a hodiny za poslední 3 měsíce.
+        Průměr = (součet čistých)/(součet hodin). Ruční hodnota má přednost.
+      </div>
     </div>
+
     <div class="row" style="width:100%">
       <div style="flex:1;min-width:180px"><label>Čistá mzda M-1</label><input id="avg_net1" type="number" step="0.01"></div>
       <div style="flex:1;min-width:180px"><label>Čistá mzda M-2</label><input id="avg_net2" type="number" step="0.01"></div>
@@ -183,6 +203,7 @@
       <div style="flex:1;min-width:180px"><label>Čistá mzda M-3</label><input id="avg_net3" type="number" step="0.01"></div>
       <div style="flex:1;min-width:180px"><label>Hodiny M-3</label><input id="avg_h3" type="number" step="0.01"></div>
     </div>
+
     <label>Ručně zadaná průměrná náhrada (Kč/h)</label><input id="avg_manual" type="number" step="0.01" placeholder="">
     <div id="avg_info" class="subtle">Průměrná náhrada: 0,00 Kč</div>
 
@@ -193,8 +214,8 @@
     <div id="meal" class="result">🍽️ Stravenky: 0,00 Kč</div>
     <div id="cafInfo" class="result">🎁 Cafeterie (mimo čistou): 0,00 Kč</div>
 
-    <!-- ✨ AUDIT -->
     <hr>
+
     <div class="h3wrap">
       <h3 style="margin:0">Hodinový audit (aktuální měsíc)</h3>
       <div class="info" title="Nápověda">ℹ️</div>
@@ -205,18 +226,22 @@
     </div>
     <div id="audit" style="display:none"></div>
 
-    <!-- ✨ roční součty -->
     <div id="yearSummary"></div>
 
-    <!-- ✍️ PODPIS -->
-<hr>
-<div class="sig">
-  <span class="me">Hanuman</span>
-  <span style="color:#ff4444;font-weight:700">&nbsp;&amp;&nbsp;</span>
-  <span class="ai">Terezka AI</span>
-</div>
-
-<!-- DŮLEŽITÉ: defer, aby se skript spustil až po parsování DOM -->
+    <hr>
+    <div class="sig">
+      <span class="me">Hanuman</span>
+      <span style="color:#ff4444;font-weight:700">&nbsp;&amp;&nbsp;</span>
+      <span class="ai">Terezka AI</span>
+    </div>
+<script>
+window.addEventListener('error', (e) => {
+  document.body.insertAdjacentHTML('afterbegin',
+    '<div style="padding:10px;margin:10px;border:1px solid #f66;color:#fdd;background:#300;border-radius:10px;font-family:system-ui">' +
+    '<b>JS ERROR:</b> ' + (e.message || 'unknown') + '</div>'
+  );
+});
+</script>
 <script src="app_v181.js?v=181" defer></script>
 </body>
-</html>
+  </html>

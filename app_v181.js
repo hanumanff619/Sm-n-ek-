@@ -13,12 +13,12 @@ const MAP12 = {
 };
 
 const MAP8 = { 
-    R: 'R 06:00–14:15', 
+    R: 'R 06:00–14:31', // OPRAVENO: Popisek pro 8h ranní sektor
     V: 'Dovolená' 
 };
 
 const MAP775 = { 
-    R: 'R 06:00–14:16', 
+    R: 'R 05:45–14:01', // OPRAVENO: Popisek pro 7.75h ranní sektor
     O: 'O 13:45–22:01', 
     V: 'Dovolená' 
 };
@@ -31,6 +31,7 @@ if (!state.mode) state.mode = '12';
 if (state.bonus_pct == null) state.bonus_pct = 10;
 if (state.annual_bonus == null) state.annual_bonus = 0;
 if (state.cafeteria_ok == null) state.cafeteria_ok = false;
+if (state.lunches_775_ok == null) state.lunches_775_ok = true; 
 
 if (!state.monthFunds) state.monthFunds = {};
 if (!state.monthRates) state.monthRates = {};
@@ -83,7 +84,9 @@ function money(x) {
 }
 
 function save() {
-    localStorage.setItem('smenarek_state_v181', JSON.stringify(state));
+    try {
+        localStorage.setItem('smenarek_state_v181', JSON.stringify(state));
+    } catch(e) {}
 }
 
 function rShiftNightH(dt) {
@@ -164,8 +167,8 @@ function updateHeader() {
     let label = '—';
     if (t !== '—') {
         if (t === 'R') {
-            if (state.mode === '7.75') label = 'R 06:00–14:16 (7.75h)';
-            else label = 'R 08:00'; 
+            if (state.mode === '7.75') label = 'R 05:45–14:01 (7.75h)';
+            else label = 'R 06:00–14:31 (8h)'; 
         } else if (t === 'F') {
             label = 'F 05:45–14:01 (Hluk)';
         } else {
@@ -240,6 +243,15 @@ function bindInputsOnce() {
         $('caf_check').checked = !!state.cafeteria_ok;
         $('caf_check').onchange = e => {
             state.cafeteria_ok = e.target.checked;
+            save();
+            calcPay();
+        };
+    }
+
+    const lcCheck = $('lunch_check');
+    if (lcCheck) {
+        lcCheck.onchange = e => {
+            state.lunches_775_ok = e.target.checked;
             save();
             calcPay();
         };
@@ -333,6 +345,7 @@ function refreshMonthScopedInputs() {
     const key = ym(current);
     if ($('fund_bonus_month')) $('fund_bonus_month').value = state.monthFunds[key] ?? '';
     if ($('rate_base_month')) $('rate_base_month').value = state.monthRates[key] ?? '';
+    if ($('lunch_check')) $('lunch_check').checked = (state.lunches_775_ok === true);
 }
 
 function updateStats() {
@@ -357,7 +370,8 @@ function updateStats() {
         const isWk = isW(dt);
 
         if (isH && !isWk && (!t || t === 'V')) {
-            let hHomeVal = (state.mode === '12') ? 11.25 : (state.mode === '7.75' ? 7.75 : 8.0);
+            let hHomeVal = (state.mode === '7.75') ? 7.75 : 8.0;
+            if (state.mode === '12') hHomeVal = 11.25;
             holPaidHomeH += hHomeVal;
             if (t === 'V') vac++;
             continue;
@@ -371,7 +385,6 @@ function updateStats() {
             if (state.mode === '7.75') {
                 baseShiftH = 7.75; 
             } else {
-                // OPRAVA: Pouze čistě ranní 'R' má 8.0h. Odpolední 'O', F i FO mají natvrdo 7.75h!
                 baseShiftH = (t === 'R') ? 8.0 : 7.75; 
             }
         }
@@ -431,35 +444,10 @@ function updateStats() {
     save();
 }
 
-function avgRate() {
-    const man = nval(state.avg.avg_manual);
-    if (man > 0) {
-        if ($('avg_info')) $('avg_info').innerHTML = `Průměr z pásky (ručně): <b>${money(man)}</b>`;
-        return man;
-    }
-    const y = current.getFullYear();
-    const m = current.getMonth();
-    let sumNet = 0, sumHours = 0;
-    for (let i = 1; i <= 3; i++) {
-        let d = new Date(y, m - i, 1);
-        let sy = d.getFullYear(), sm = d.getMonth();
-        if (state.yearSummary[sy] && state.yearSummary[sy][sm]) {
-            const h = state.yearSummary[sy][sm];
-            sumNet += (h.net || 0);
-            sumHours += (h.hours || 0);
-        }
-    }
-    if (sumNet > 0 && sumHours > 0) {
-        const calculatedAvg = sumNet / sumHours;
-        if ($('avg_info')) $('avg_info').innerHTML = `Auto průměr z historie: <b>${calculatedAvg.toFixed(2)} Kč/h</b>`;
-        return calculatedAvg;
-    }
-    if ($('avg_info')) $('avg_info').innerHTML = `Zadejte průměr z pásky!`;
-    return 0; 
-}
-
 function calcPay() {
-    const avg = avgRate();
+    let avg = 0;
+    try { avg = avgRate(); } catch(e) { avg = nval(state.avg.avg_manual); }
+
     const C = state._calc || { hours: 0, afterH: 0, nightH: 0, weekendH: 0, vac: 0, holWorkedH: 0, holPaidHomeH: 0, continuousH: 0, autoOT: 0, fDays: 0 };
     const ymKey = ym(current);
     const effB = nval(state.monthRates[ymKey]) || nval(state.rates['rate_base']) || 148.50;
@@ -539,12 +527,15 @@ function calcPay() {
                 if (t === 'FO' || t === 'O') {
                     dayStravenky = 1; 
                 } else if (t === 'F' || t === 'R') {
-                    lc += 1; 
+                    if (state.mode === '7.75') {
+                        if (state.lunches_775_ok === true) lc += 1; 
+                    } else {
+                        lc += 1; 
+                    }
                 }
             }
         }
 
-        // --- PŘESNÉ LOGICKÉ OMEZENÍ 11+ HODIN ---
         if (!isW(dt) && !isH && (t === 'R' || t === 'F') && actH > 11.0) {
             dayStravenky += 1;
         }
@@ -583,9 +574,9 @@ function calcPay() {
         ].map(([k, v]) => `<div class="payline"><span>${k}</span><span><b>${v}</b></span></div>`).join('');
     }
 
-    $('gross').textContent = '💼 Hrubá mzda: ' + money(gross);
-    $('net').textContent = '💵 Čistá mzda (odhad): ' + money(net);
-    $('meal').textContent = '🍽️ Stravenky: ' + mc + ' ks — ' + money(mc * 110);
+    if ($('gross')) $('gross').textContent = '💼 Hrubá mzda: ' + money(gross);
+    if ($('net')) $('net').textContent = '💵 Čistá mzda (odhad): ' + money(net);
+    if ($('meal')) $('meal').textContent = '🍽️ Stravenky: ' + mc + ' ks — ' + money(mc * 110);
     const cafVal = state.cafeteria_ok ? '1 000,00 Kč' : '0,00 Kč';
     if ($('cafInfo')) {
         $('cafInfo').innerHTML = `🎁 Cafeterie (mimo čistou): <b>${cafVal}</b>`;
@@ -593,7 +584,7 @@ function calcPay() {
     state.yearSummary[current.getFullYear()] = state.yearSummary[current.getFullYear()] || {};
     state.yearSummary[current.getFullYear()][current.getMonth()] = { gross, net, hours: C.hours, mealCount: mc, mealValue: mc * 110, ts: Date.now() };
     save();
-    renderYearSummary();
+    try { renderYearSummary(); } catch(e) {}
 }
 
 function renderYearSummary() {

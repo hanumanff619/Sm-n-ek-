@@ -354,7 +354,9 @@ function updateStats() {
         if (t === 'V') { vac++; continue; }
 
         let baseShiftH = DAILY_WORKED;
-        if (t === 'R' || t === 'O' || t === 'F' || t === 'FO' || t === 'F16') {
+        if (t === 'F16') {
+            baseShiftH = 15.50;
+        } else if (t === 'R' || t === 'O' || t === 'F' || t === 'FO') {
             if (state.mode === '7.75') {
                 baseShiftH = 7.75; 
             } else {
@@ -370,7 +372,7 @@ function updateStats() {
             if (t === 'F' || t === 'FO' || t === 'F16') {
                 fDays += (t === 'F16' ? 2 : 1); 
                 hours += curH; 
-                if (t === 'FO' || t === 'F16') afterH += Math.min(curH, 7.75);
+                if (t === 'FO' || t === 'F16') afterH += (t === 'F16' ? 15.50 : Math.min(curH, 7.75));
                 if (isH) holWorkedH += curH;
                 if (isWk) weekendH += curH;
             } else {
@@ -455,13 +457,9 @@ function calcPay() {
     const holHomePay = avg * holHomeH;
     const holPay = holWorkedPay + holHomePay;
 
-    // MATEMATIKA: 4 Kč za každou odpracovanou hodinu na D a N směnách
     const continuousPay = (C.continuousH || 0) * 4;
-
-    // PŘESČASY: Auto výpočet (víkendy/svátky) + to, co naťukáš ručně do políčka "Přesčas Man."
     const totalOT = C.autoOT + r.man_ot;
     const otExtraPay = (avg * 0.25) * totalOT;
-    
     const primeP = basePay * (nval(state.bonus_pct) / 100);
     
     const vacH = C.vac * ((state.mode === '7.75') ? 7.75 : 7.50);
@@ -480,7 +478,9 @@ function calcPay() {
         const isH = isHoliday(dt);
 
         let baseH = 11.25;
-        if (t === 'R' || t === 'O' || t === 'F' || t === 'FO' || t === 'F16') {
+        if (t === 'F16') {
+            baseH = 15.50;
+        } else if (t === 'R' || t === 'O' || t === 'F' || t === 'FO') {
             baseH = (state.mode === '7.75') ? 7.75 : ((t === 'R') ? 8.0 : 7.75);
         }
         let actH = (state.customHours && state.customHours[key] !== undefined) ? nval(state.customHours[key]) : baseH;
@@ -577,10 +577,17 @@ function renderCalendar() {
                 let currentH = state.customHours[dateKey];
                 if (currentH === undefined) {
                     let code = state.shifts[dateKey];
-                    if (code === 'V') currentH = (state.mode === '7.75') ? 7.75 : 7.50;
-                    else if (code === 'R' || code === 'O' || code === 'F' || code === 'FO' || code === 'F16') {
+                    
+                    // NEPRŮSTŘELNÉ ŘEŠENÍ: F16 musí být hned na prvním místě!
+                    if (code === 'F16') {
+                        currentH = 15.50;
+                    } else if (code === 'V') {
+                        currentH = (state.mode === '7.75') ? 7.75 : 7.50;
+                    } else if (code === 'R' || code === 'O' || code === 'F' || code === 'FO') {
                         currentH = (state.mode === '7.75') ? 7.75 : ((code === 'R') ? 8.0 : 7.75);
-                    } else currentH = (code === 'F16' ? 16.25 : 11.25);
+                    } else {
+                        currentH = 11.25;
+                    }
                 }
                 let val = prompt(`Upravit odpracované hodiny pro den ${dateKey} (aktuálně: ${currentH} h):`, currentH);
                 if (val !== null) {

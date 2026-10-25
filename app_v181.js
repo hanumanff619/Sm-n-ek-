@@ -50,6 +50,8 @@ if (state.cafeteria_ok == null) state.cafeteria_ok = false;
 if (!state.monthFunds) state.monthFunds = {};
 if (!state.monthRates) state.monthRates = {};
 if (!state.monthOvertime) state.monthOvertime = {};
+if (!state.monthOTIn) state.monthOTIn = {};
+if (!state.monthOTOut) state.monthOTOut = {};
 
 if (!state.avg) {
     state.avg = {
@@ -68,7 +70,6 @@ if (!state.yearSummary) state.yearSummary = {};
 let current = new Date();
 let selectedDate = null;
 
-// Pomocné funkce
 const $ = id => document.getElementById(id);
 const pad = n => n < 10 ? '0' + n : n;
 const ymd = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
@@ -105,7 +106,6 @@ function rShiftNightH(dt) {
     return 0;
 }
 
-// Namedays
 async function setTodayNameday() {
     try {
         const d = new Date();
@@ -124,7 +124,6 @@ async function setTodayNameday() {
     }
 }
 
-// Svátky
 const HOLI_CACHE = {};
 function easterSunday(year) {
     const a = year % 19;
@@ -213,7 +212,6 @@ function setShift(dateStr, t, rerender = true) {
     if (rerender) renderCalendar();
 }
 
-// Výchozí hodiny pro směny
 function getDefaultShiftHours(t) {
     if (t === 'RJ') return 8.0;
     if (t === '1/2') return 4.0;
@@ -253,6 +251,26 @@ function bindInputsOnce() {
         otEl.oninput = e => {
             const key = ym(current);
             state.monthOvertime[key] = e.target.value === '' ? null : nval(e.target.value);
+            save();
+            calcPay();
+        };
+    }
+
+    const otIn = $('ot_prev_in');
+    if (otIn) {
+        otIn.oninput = e => {
+            const key = ym(current);
+            state.monthOTIn[key] = e.target.value === '' ? null : nval(e.target.value);
+            save();
+            calcPay();
+        };
+    }
+
+    const otOut = $('ot_prev_out');
+    if (otOut) {
+        otOut.oninput = e => {
+            const key = ym(current);
+            state.monthOTOut[key] = e.target.value === '' ? null : nval(e.target.value);
             save();
             calcPay();
         };
@@ -374,6 +392,8 @@ function refreshMonthScopedInputs() {
     if ($('fund_bonus_month')) $('fund_bonus_month').value = state.monthFunds[key] ?? '';
     if ($('rate_base_month')) $('rate_base_month').value = state.monthRates[key] ?? '';
     if ($('rate_nepretrzity')) $('rate_nepretrzity').value = state.monthOvertime[key] ?? '';
+    if ($('ot_prev_in')) $('ot_prev_in').value = state.monthOTIn[key] ?? '';
+    if ($('ot_prev_out')) $('ot_prev_out').value = state.monthOTOut[key] ?? '';
 }
 
 function updateStats() {
@@ -383,7 +403,8 @@ function updateStats() {
 
     let dDay = 0, nDay = 0, vacDays = 0, docDays = 0, hours = 0, nightH = 0, afterH = 0, weekendH = 0, holWorkedH = 0, rDays = 0, oDays = 0, fDays = 0;
     let vacHours = 0, docHours = 0, unworkedHolHours = 0;
-    let workDaysCount = 0; // Všední dny
+    let continuousH = 0; // Celkové hodiny v nepřetržitém provozu (D + N)
+    let workDaysCount = 0;
 
     for (let i = 1; i <= last.getDate(); i++) {
         const dt = new Date(y, m, i);
@@ -394,7 +415,6 @@ function updateStats() {
 
         if (!isWk) {
             workDaysCount++;
-            // Neodpracovaný svátek ve všední den
             if (isH && (!t || t === 'V' || t === 'L' || t === 'LD')) {
                 if (!t) unworkedHolHours += 7.50;
             }
@@ -432,11 +452,11 @@ function updateStats() {
                 if (isH) holWorkedH += curH;
             }
         } else if (t === 'D') {
-            dDay++; hours += curH; afterH += 3.75;
+            dDay++; hours += curH; afterH += 3.75; continuousH += curH;
             if (isWk) weekendH += curH; 
             if (isH) holWorkedH += curH;
         } else if (t === 'N') {
-            nDay++; hours += curH; afterH += 4; nightH += 7.25;
+            nDay++; hours += curH; afterH += 4; nightH += 7.25; continuousH += curH;
             if (isWk) weekendH += curH; 
             if (isH) holWorkedH += curH;
             const nextDay = new Date(y, m, i + 1);
@@ -444,12 +464,19 @@ function updateStats() {
         }
     }
 
+    const ymKey = ym(current);
+    const otIn = nval(state.monthOTIn[ymKey]);
+    const otOut = nval(state.monthOTOut[ymKey]);
+
     const monthFundHours = workDaysCount * 7.50;
     const totalRecognized = hours + vacHours + docHours + unworkedHolHours;
     const autoOT = Math.max(0, totalRecognized - monthFundHours);
+    
+    const finalOT = autoOT + otIn - otOut;
+    const paidBaseHours = Math.max(0, hours + otIn - otOut);
 
     if ($('stats')) {
-        $('stats').innerHTML = `R:${rDays} O:${oDays} F:${fDays} D:${dDay} N:${nDay} V:${vacDays} L:${docDays}<br>Odpracováno: <b>${r2(hours)}h</b> / Fond: <b>${monthFundHours}h</b>`;
+        $('stats').innerHTML = `R:${rDays} O:${oDays} F:${fDays} D:${dDay} N:${nDay} V:${vacDays} L:${docDays}<br>Odpracováno (dílna): <b>${r2(hours)}h</b> / Fond: <b>${monthFundHours}h</b>`;
     }
 
     if ($('substats')) {
@@ -458,10 +485,13 @@ function updateStats() {
             `<div class="payline"><span>Odpolední hodiny</span><span><b>${r2(afterH)}</b> h</span></div>`,
             `<div class="payline"><span>Noční hodiny (22–6)</span><span><b>${r2(nightH)}</b> h</span></div>`,
             `<div class="payline"><span>Víkendové hodiny</span><span><b>${r2(weekendH)}</b> h</span></div>`,
-            `<div class="payline"><span>Přesčas nad fond</span><span><b>${r2(autoOT)}</b> h</span></div>`
+            `<div class="payline"><span>Nepřetržitý provoz (D+N)</span><span><b>${r2(continuousH)}</b> h</span></div>`,
+            `<div class="payline"><span>Přesčas měsíc (nad fond)</span><span><b>${r2(autoOT)}</b> h</span></div>`,
+            `<div class="payline"><span>Převody (+minulý / -příští)</span><span><b>+${otIn} / -${otOut}</b> h</span></div>`,
+            `<div class="payline" style="color:var(--goodtext)"><span>Celkové zaplacené hodiny (základ)</span><span><b>${r2(paidBaseHours)}</b> h</span></div>`
         ].join('');
     }
-    state._calc = { hours, vacHours, docHours, unworkedHolHours, afterH, nightH, weekendH, vacDays, docDays, holWorkedH, autoOT, fDays, monthFundHours };
+    state._calc = { hours, paidBaseHours, vacHours, docHours, unworkedHolHours, afterH, nightH, weekendH, continuousH, vacDays, docDays, holWorkedH, autoOT, finalOT, fDays, monthFundHours };
     save();
 }
 
@@ -494,9 +524,10 @@ function avgRate() {
 
 function calcPay() {
     const avg = avgRate();
-    const C = state._calc || { hours: 0, vacHours: 0, docHours: 0, unworkedHolHours: 0, afterH: 0, nightH: 0, weekendH: 0, vacDays: 0, docDays: 0, holWorkedH: 0, autoOT: 0, fDays: 0, monthFundHours: 0 };
+    const C = state._calc || { hours: 0, paidBaseHours: 0, vacHours: 0, docHours: 0, unworkedHolHours: 0, afterH: 0, nightH: 0, weekendH: 0, continuousH: 0, vacDays: 0, docDays: 0, holWorkedH: 0, autoOT: 0, finalOT: 0, fDays: 0, monthFundHours: 0 };
     const ymKey = ym(current);
     const effB = nval(state.monthRates[ymKey]) || nval(state.rates['rate_base']) || 148.50;
+    
     const manualOT = nval(state.monthOvertime[ymKey]);
 
     const r = {
@@ -507,20 +538,23 @@ function calcPay() {
         nep: manualOT
     };
 
-    // Složky mzdy přesně dle pásky Madety:
-    const vacPay = avg * C.vacHours;                          // Čerpání dovolené
-    const unworkedHolPay = avg * C.unworkedHolHours;           // Svátek - náhrada
-    const docPay = avg * C.docHours;                          // Náhrada - návštěva lékaře
-    const basePay = r.b * C.hours;                            // Mzda časová přímá
-    const holWorkedPay = avg * 1.25 * C.holWorkedH;           // Práce ve svátek 125%
+    const vacPay = avg * C.vacHours;                          
+    const unworkedHolPay = avg * C.unworkedHolHours;           
+    const docPay = avg * C.docHours;                          
+
+    const basePay = r.b * C.paidBaseHours;                            
+    const holWorkedPay = avg * 1.25 * C.holWorkedH;           
     
-    const totalOT = C.autoOT + r.nep;
-    const otExtraPay = (avg * 0.25) * totalOT;                 // Příplatek za přesčas 25%
+    const totalOT = C.finalOT + r.nep;
+    const otExtraPay = (avg * 0.25) * totalOT;                 
     
-    const weekPay = r.v * C.weekendH;                         // Přípl. za práci v So Ne 40,-
-    const nightPay = r.n * C.nightH;                          // Přípl. za práci v noci - 30
-    const odpoPay = r.o * C.afterH;                           // Přípl. za II. směnu - 10
-    const hlukPay = C.fDays * (7.75 * 6);                     // Přípl. za obtížné prac. podmínky
+    const weekPay = r.v * C.weekendH;                         
+    const nightPay = r.n * C.nightH;                          
+    const odpoPay = r.o * C.afterH;                           
+    const hlukPay = C.fDays * (7.75 * 6);                     
+
+    // Příplatek za práci v nepřetržitém režimu (4 Kč/h za směny D a N)
+    const continuousPay = C.continuousH * 4;
 
     const currentMonth = current.getMonth();
     let annB = 0;
@@ -530,8 +564,8 @@ function calcPay() {
         annB = nval(state.annual_bonus);
     }
 
-    const fund = nval(state.monthFunds[ymKey]);               // Odměna z fondu vedoucího
-    const primeP = basePay * (nval(state.bonus_pct) / 100);   // Prémie k časové mzdě přímé
+    const fund = nval(state.monthFunds[ymKey]);               
+    const primeP = basePay * (nval(state.bonus_pct) / 100);   
 
     let mc = 0, lc = 0, satB = 0;
     for (let i = 1; i <= daysIn(current.getFullYear(), current.getMonth()); i++) {
@@ -546,6 +580,7 @@ function calcPay() {
             if (isW(dt)) mc += 2; 
             else { mc += 1; if(!noL) lc++; else mc++; } 
         } else if (t === 'R' || t === 'RJ' || t === 'O' || t === 'F' || t === 'FO' || t === 'F16' || t === '1/2') { 
+            // Příplatek za ranní směny v sobotu
             if ((t === 'R' || t === 'RJ') && isSat(dt)) satB += 500;
             
             if (t === 'FO') {
@@ -569,10 +604,10 @@ function calcPay() {
         }
     }
 
-    const mealDeduct = mc * MEAL_DEDUCT;                      // Srážka Stravenky ks
-    const lunchDeduct = lc * LUNCH_DEDUCT;                    // Obědy Gastro
+    const mealDeduct = mc * MEAL_DEDUCT;                      
+    const lunchDeduct = lc * LUNCH_DEDUCT;                    
     
-    const gross = basePay + odpoPay + nightPay + weekPay + holWorkedPay + otExtraPay + primeP + vacPay + docPay + unworkedHolPay + annB + fund + satB + hlukPay;
+    const gross = basePay + odpoPay + nightPay + weekPay + holWorkedPay + otExtraPay + primeP + vacPay + docPay + unworkedHolPay + annB + fund + satB + hlukPay + continuousPay;
 
     const soc = Math.round(gross * 0.065);
     const hlth = Math.round(gross * 0.045);
@@ -584,14 +619,15 @@ function calcPay() {
             ['Čerpání dovolené', money(vacPay)],
             ['Svátek - náhrada', money(unworkedHolPay)],
             ['Náhrada - návštěva lékaře', money(docPay)],
-            ['Mzda časová přímá', money(basePay)],
+            ['Mzda časová přímá (' + r2(C.paidBaseHours) + 'h)', money(basePay)],
             ['Práce ve svátek 125%', money(holWorkedPay)],
             ['Příplatek za přesčas 25% (' + r2(totalOT) + 'h)', money(otExtraPay)],
             ['Přípl. za práci v So Ne 40,-', money(weekPay)],
             ['Přípl. za práci v noci - 30', money(nightPay)],
             ['Přípl. za II. směnu - 10', money(odpoPay)],
             ['Přípl. za obtížné prac. podmínky', money(hlukPay)],
-            ['Přípl. v nepřetržitém / Soboty R', money(satB)],
+            ['Přípl. za práci v nepřetržitém režimu', money(continuousPay)],
+            ['Přípl. za ranní směny v sobotu', money(satB)],
             ['Odměna z fondu vedoucího', money(fund)],
             ['Prémie k časové mzdě přímé (' + (state.bonus_pct || 0) + '%)', money(primeP)],
             ['Motivační odměna', money(annB)],
@@ -605,7 +641,7 @@ function calcPay() {
     $('meal').textContent = '🍽️ Stravenky: ' + mc + ' ks — ' + money(mc * 110);
     const cafVal = state.cafeteria_ok ? '1 000,00 Kč' : '0,00 Kč';
     if ($('cafInfo')) {
-        $('cafInfo').innerHTML = `🎁 Motivační odměna - cafeteria: <b>${cafVal}</b>`;
+        $('cafInfo').innerHTML = `🎁 Cafeterie: <b>${cafVal}</b>`;
     }
     state.yearSummary[current.getFullYear()] = state.yearSummary[current.getFullYear()] || {};
     state.yearSummary[current.getFullYear()][current.getMonth()] = { gross, net, hours: C.hours, mealCount: mc, mealValue: mc * 110, ts: Date.now() };
